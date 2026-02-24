@@ -1,0 +1,243 @@
+:root {
+    --bg-color: #0b141a;
+    --card-bg: #15202b;
+    --primary-green: #00cf56;
+    --text-main: #ffffff;
+    --text-dim: #a0a0a0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-image: url('1.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-main);
+    /* overflow: hidden; */
+}
+
+/* Layout */
+.layout {
+    display: flex;
+}
+
+/* Sidebar */
+.navbar {
+    width: 240px;
+    min-height: 100vh;
+    position: fixed;
+    background: rgba(28, 39, 50, 0.7);
+    backdrop-filter: blur(10px);
+    padding-top: 30px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px ;
+    color: var(--primary-green);
+    font-size: 1.3rem;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 15px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background: rgba(46,204,113,0.15);
+    color: var(--primary-green);
+}
+
+/* Content */
+.container {
+    margin-left: 260px;
+    padding: 30px;
+    width: 100%;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.title-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.leaf-icon {
+    font-size: 40px;
+    color: var(--primary-green);
+}
+
+.status-badge {
+    background: rgba(46,204,113,0.2);
+    color: var(--primary-green);
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+/* Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    padding: 15px 20px;   /* Giảm padding */
+    border-radius: 12px;  /* Bo góc nhỏ lại */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+.card i {
+    font-size: 50px;
+    opacity: 0.9;
+}
+.temp { background: linear-gradient(135deg,#ff0808,#ffb199); }
+.humid { background: linear-gradient(135deg,#007adf,#00ecbc); }
+.light { background: linear-gradient(135deg,#f83600,#f9d423); }
+
+/* Chart */
+.chart-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    width: 1000px;
+}
+
+
+
+/* Controls */
+.controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; } 
+.control-card { background: var(--card-bg); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 15px; } 
+.control-card i { font-size: 35px; transition: all 0.3s ease; } /* Màu Vàng cho Đèn */ 
+.icon-light { color: #f1c40f; filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.5)); } /* Màu Cam cho Quạt */ 
+.icon-fan { color: #e67e22; filter: drop-shadow(0 0 8px rgba(230, 126, 34, 0.5)); } /* Màu Xanh Dương cho Điều Hòa */
+ .icon-air { color: #3498db; filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.5)); }
+
+/* Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.switch input { display: none; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #ff4d4d;
+    border-radius: 34px;
+    transition: .4s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background: var(--primary-green);
+}
+
+input:checked + .slider:before {
+    transform: translateX(30px);
+}
+
+/* Chart + Controls nằm ngang */
+.chart-section {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* Biểu đồ chiếm nhiều diện tích hơn */
+.chart-container {
+    flex: 3;
+}
+
+/* Controls dọc bên phải */
+.controls-vertical {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Card nhỏ lại cho đẹp */
+.controls-vertical .control-card {
+    padding: 20px;
+}
+
+.switch-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top: 3px solid #f1c40f;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: spin 0.8s linear infinite;
+    display: none;
+    z-index: 5;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.control-card.loading .loader {
+    display: block;
+}
+
+.control-card.loading .switch {
+    opacity: 0.3;
+    pointer-events: none;
+}
+

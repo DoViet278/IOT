@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>IoT - Data Sensors</title>
+    <link rel="stylesheet" href="sensors.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+   <div class="layout">
+        <nav class="navbar">
+            <div class="sidebar-title">
+                <i class="fa-brands fa-pagelines"></i>
+                <h2>IOT</h2>
+            </div>
+
+            <div class="nav-links">
+                <a href="index.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="sensors.html" class="active"><i class="fa-solid fa-database"></i> Data Sensors</a>
+                <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+                <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+            </div>
+        </nav>
+
+        <div class="container">
+             <header class="main-header">
+                <div class="title-area">
+                    <h1>Bảng dữ liệu cảm biến</h1>
+                </div>
+            </header>
+            <div class="filter-bar">
+                <div class="search-group">
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-calendar"></i>
+                        <input type="date">
+                    </div>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-clock"></i>
+                        <input type="time" step="1">
+                    </div>
+                    <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+                </div>
+                <select class="sensor-filter">
+                    <option value="all">Tất cả cảm biến</option>
+                    <option value="temp">nhiệt độ</option>
+                    <option value="humid">độ ẩm</option>
+                    <option value="light">ánh sáng</option>
+                </select>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cảm biến</th>
+                            <th>Giá trị cảm biến</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sensor-data">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>    
+   </div>
+
+<script>
+const API_BASE = "http://localhost:3001/api/sensors";
+
+let currentPage = 1;
+let currentSearch = "";
+let currentSensor = "";
+const limit = 10;
+
+const tableBody = document.getElementById("sensor-data");
+const paginationContainer = document.querySelector(".pagination");
+const searchBtn = document.querySelector(".btn-search");
+const dateInput = document.querySelector("input[type='date']");
+const timeInput = document.querySelector("input[type='time']");
+const sensorFilter = document.querySelector(".sensor-filter");
+
+
+// =======================
+// FORMAT dd/mm/yy HH:mm:ss
+// =======================
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yy = String(date.getFullYear()).slice(-2);
+
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    const ss = String(date.getSeconds()).padStart(2, "0");
+
+    return `${dd}/${mm}/${yy} ${hh}:${min}:${ss}`;
+}
+
+
+// =======================
+// LOAD DATA
+// =======================
+async function loadData() {
+
+    const params = new URLSearchParams({
+        limit,
+        page: currentPage
+    });
+
+    if (currentSearch) {
+        params.append("search", currentSearch);
+    }
+
+    if (currentSensor && currentSensor !== "all") {
+        params.append("sensor", currentSensor);
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}?${params}`);
+        const result = await res.json();
+
+        renderTable(result.data);
+        renderPagination(result.totalPages);
+
+    } catch (error) {
+        console.error("Lỗi load data:", error);
+    }
+}
+
+
+// =======================
+// RENDER TABLE
+// =======================
+function renderTable(data) {
+
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align:center">Không có dữ liệu</td>
+            </tr>
+        `;
+        return;
+    }
+
+    let html = "";
+
+    data.forEach(item => {
+        html += `
+            <tr>
+                <td>#${item.ID}</td>
+                <td>${item.SensorName}</td>
+                <td class="sensor-val">${item.Value}</td>
+                <td>${formatDate(item.CreatedAt)}</td>
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
+}
+
+
+// =======================
+// RENDER PAGINATION
+// =======================
+function renderPagination(totalPages) {
+
+    const container = document.getElementById("pagination");
+    container.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // ======================
+    // PREVIOUS BUTTON
+    // ======================
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "page-btn";
+    prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
+    prevBtn.disabled = currentPage === 1;
+
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadData();
+        }
+    };
+
+    container.appendChild(prevBtn);
+
+    // ======================
+    // HIỂN THỊ 3 TRANG
+    // ======================
+
+    let startPage = Math.max(1, currentPage - 1);
+    let endPage = Math.min(totalPages, startPage + 2);
+
+    // Nếu gần cuối thì đẩy lại cho đủ 3 trang
+    if (endPage - startPage < 2) {
+        startPage = Math.max(1, endPage - 2);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+
+        const btn = document.createElement("button");
+        btn.className = "page-btn";
+        btn.textContent = i;
+
+        if (i === currentPage) {
+            btn.classList.add("active");
+        }
+
+        btn.onclick = () => {
+            currentPage = i;
+            loadData();
+        };
+
+        container.appendChild(btn);
+    }
+
+    // ======================
+    // NEXT BUTTON
+    // ======================
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "page-btn";
+    nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
+    nextBtn.disabled = currentPage === totalPages;
+
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadData();
+        }
+    };
+
+    container.appendChild(nextBtn);
+}
+
+
+// =======================
+// SEARCH
+// =======================
+searchBtn.addEventListener("click", () => {
+
+    const date = dateInput.value;
+    const time = timeInput.value;
+
+    if (date) {
+        const searchString = time
+            ? `${date} ${time}`
+            : date;
+
+        currentSearch = searchString;
+    } else {
+        currentSearch = "";
+    }
+
+    currentPage = 1;
+    loadData();
+});
+
+
+// =======================
+// FILTER SENSOR
+// =======================
+sensorFilter.addEventListener("change", () => {
+
+    const value = sensorFilter.value;
+
+    if (value === "temp") currentSensor = "Nhiệt độ";
+    else if (value === "humid") currentSensor = "Độ ẩm";
+    else if (value === "light") currentSensor = "Ánh sáng";
+    else currentSensor = "";
+
+    currentPage = 1;
+    loadData();
+});
+
+
+// =======================
+// INIT
+// =======================
+loadData();
+
+</script>
+</body>
+</html>

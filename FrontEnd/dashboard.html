@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>IoT Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <nav class="navbar">
+        <div class="sidebar-title">
+            <i class="fa-brands fa-pagelines"></i>
+            <h2>IOT</h2>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="sensors.html"><i class="fa-solid fa-database"></i> Data Sensors</a>
+            <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+            <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="container">
+
+        <!-- STATISTICS -->
+        <section class="stats-grid">
+            <div class="card temp">
+                <div>
+                    <h3>Nhiệt Độ</h3>
+                    <h2 id="tempValue">-- °C</h2>
+                </div>
+                <i class="fa-solid fa-temperature-high"></i>
+            </div>
+
+            <div class="card humid">
+                <div>
+                    <h3>Độ Ẩm</h3>
+                    <h2 id="humidValue">-- %</h2>
+                </div>
+                <i class="fa-solid fa-droplet"></i>
+            </div>
+
+            <div class="card light">
+                <div>
+                    <h3>Ánh Sáng</h3>
+                    <h2 id="lightValue">-- lx</h2>
+                </div>
+                <i class="fa-solid fa-sun"></i>
+            </div>
+        </section>
+
+        <div class="chart-section">
+
+            <!-- CHART -->
+            <section class="chart-container">
+                <h3>Biểu Đồ 10 Giá Trị Gần Nhất</h3>
+                <canvas id="iotChart"></canvas>
+            </section>
+
+            <!-- DEVICE CONTROL -->
+            <section class="controls-vertical">
+
+                <div class="control-card" data-id="1">
+                    <i class="fa-solid fa-lightbulb icon-light"></i>
+                    <span>Đèn</span>
+                     <div class="switch-wrapper">
+                        <div class="loader"></div>
+                        <label class="switch">
+                            <input type="checkbox" id="lightSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-card" data-id="2">
+                    <i class="fa-solid fa-fan icon-fan"></i>
+                    <span>Quạt</span>
+                     <div class="switch-wrapper">
+                        <div class="loader"></div>
+                        <label class="switch">
+                            <input type="checkbox" id="fanSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-card" data-id="3">
+                    <i class="fa-solid fa-snowflake icon-air"></i>
+                    <span>Điều Hòa</span>
+                    <div class="switch-wrapper">
+                        <div class="loader"></div>
+                        <label class="switch">
+                            <input type="checkbox" id="airSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>  
+                </div>
+
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:3001/api/sensors?limit=30&page=1";
+const API_BASE = "http://localhost:3001/api/devices";
+const socket = io("http://localhost:3001");
+
+socket.on("connect", () => {
+    console.log("✅ Đã kết nối Socket:", socket.id);
+});
+
+const ctx = document.getElementById('iotChart').getContext('2d');
+
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Nhiệt độ (°C)',
+                data: [],
+                borderColor: '#ff4d4d',
+                backgroundColor: 'rgba(255,77,77,0.15)',
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Độ ẩm (%)',
+                data: [],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52,152,219,0.15)',
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Ánh sáng (lx)',
+                data: [],
+                borderColor: '#f1c40f',
+                backgroundColor: 'rgba(241,196,15,0.15)',
+                fill: true,
+                tension: 0.4
+            }
+        ]
+    }
+});
+
+const MAX_POINTS = 10;
+
+// ================= LOAD DATA BAN ĐẦU =================
+async function loadInitialData() {
+    try {
+        const res = await fetch(API_URL);
+        const result = await res.json();
+        const data = result.data;
+
+        const tempData = data.filter(d => d.SensorName === "nhiệt độ").slice(0,10).reverse();
+        const humidData = data.filter(d => d.SensorName === "độ ẩm").slice(0,10).reverse();
+        const lightData = data.filter(d => d.SensorName === "ánh sáng").slice(0,10).reverse();
+
+        if (tempData.length)
+            document.getElementById("tempValue").innerText =
+                tempData[tempData.length - 1].Value + " °C";
+
+        if (humidData.length)
+            document.getElementById("humidValue").innerText =
+                humidData[humidData.length - 1].Value + " %";
+
+        if (lightData.length)
+            document.getElementById("lightValue").innerText =
+                lightData[lightData.length - 1].Value + " lx";
+
+        chart.data.labels = tempData.map((_, i) => i + 1);
+        chart.data.datasets[0].data = tempData.map(d => d.Value);
+        chart.data.datasets[1].data = humidData.map(d => d.Value);
+        chart.data.datasets[2].data = lightData.map(d => d.Value);
+
+        chart.update();
+
+    } catch (err) {
+        console.error("Lỗi load dữ liệu:", err);
+    }
+}
+
+// ================= REALTIME SOCKET =================
+function pushData(index, value) {
+    chart.data.datasets[index].data.push(value);
+    if (chart.data.datasets[index].data.length > MAX_POINTS) {
+        chart.data.datasets[index].data.shift();
+    }
+}
+
+socket.on("sensorData", (data) => {
+    console.log("Nhận sensor:", data);
+
+    if (chart.data.labels.length >= MAX_POINTS) {
+        chart.data.labels.shift();
+
+        // shift tất cả dataset cùng lúc
+        chart.data.datasets.forEach(ds => ds.data.shift());
+    }
+
+    chart.data.labels.push(data.time);
+    chart.data.datasets[0].data.push(data.temperature);
+    chart.data.datasets[1].data.push(data.humidity);
+    chart.data.datasets[2].data.push(data.light);
+    // Cập nhật giá trị hiển thị
+    document.getElementById("tempValue").innerText =
+        data.temperature + " °C";
+
+    document.getElementById("humidValue").innerText =
+        data.humidity + " %";
+
+    document.getElementById("lightValue").innerText =
+        data.light + " lx";
+
+    // Push vào chart
+   
+    chart.update();
+});
+
+loadInitialData();
+
+// Map DeviceID
+const DEVICE = {
+    LIGHT: 1,
+    FAN: 2,
+    AIR: 3
+};
+
+const switches = {
+    1: document.getElementById("lightSwitch"),
+    2: document.getElementById("fanSwitch"),
+    3: document.getElementById("airSwitch")
+};
+
+
+// ================= LOAD TRẠNG THÁI BAN ĐẦU =================
+async function loadDeviceStatus() {
+    try {
+        const res = await fetch(`${API_BASE}/status`);
+        const data = await res.json();
+
+        Object.keys(data).forEach(id => {
+            if (switches[id]) {
+                switches[id].checked = (data[id] === "ON");
+            }
+        });
+
+    } catch (err) {
+        console.error("Lỗi load device status:", err);
+    }
+}
+
+
+
+// ================= GỬI LỆNH BẬT/TẮT =================
+async function sendControl(DeviceID, isOn) {
+
+    const Action = isOn ? "ON" : "OFF";
+
+    try {
+        await fetch(`${API_BASE}/control`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ DeviceID, Action })
+        });
+        console.log("post api");
+    } catch (err) {
+        console.error("Lỗi gửi lệnh:", err);
+    }
+}
+
+// ==========================
+// HÀM BẬT/TẮT LOADING
+// ==========================
+function setLoading(deviceId, state) {
+
+    const card = document.querySelector(`.control-card[data-id="${deviceId}"]`);
+    if (!card) return;
+
+    if (state) {
+        card.classList.add("loading");
+    } else {
+        card.classList.remove("loading");
+    }
+}
+
+
+// ================= SỰ KIỆN CLICK SWITCH =================
+Object.keys(switches).forEach(id => {
+
+    if (!switches[id]) return;
+
+    switches[id].addEventListener("change", function () {
+
+        const isOn = this.checked;
+
+        // bật loading khi gửi lệnh
+        setLoading(id, true);
+
+        sendControl(parseInt(id), isOn);
+    });
+});
+
+
+
+// ================= SOCKET REALTIME UPDATE =================
+socket.on("device_status_update", (data) => {
+
+    console.log("Realtime device:", data);
+
+    const { DeviceID, Status, Action } = data;
+
+    if (!switches[DeviceID]) return;
+
+    // Nếu đang Processing thì không đổi gì
+    if (Status === "Processing") {
+        setLoading(DeviceID, true);
+        return;
+    }
+
+    // Nếu Success → cập nhật trạng thái đúng
+    if (Status === "Success") {
+        switches[DeviceID].checked = (Action === "ON");
+    }
+
+    // Nếu Fail → revert lại trạng thái
+    if (Status === "Fail") {
+        switches[DeviceID].checked = !(Action === "ON");
+        alert("Thiết bị không phản hồi (Timeout)");
+    }
+
+    // Tắt loading khi có kết quả
+    setLoading(DeviceID, false);
+});
+
+
+
+// ================= INIT =================
+loadDeviceStatus();
+</script>
+
+</body>
+</html>
