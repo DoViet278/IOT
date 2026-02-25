@@ -15,7 +15,7 @@
             </div>
 
             <div class="nav-links">
-                <a href="index.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="dashboard.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
                 <a href="sensors.html"><i class="fa-solid fa-database"></i> Data Sensors</a>
                 <a href="history.html"  class="active"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
                 <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
@@ -23,11 +23,11 @@
         </nav>
 
     <div class="container">
-        <header class="main-header">
+        <!-- <header class="main-header">
             <div class="title-area">
                 <h1>Lịch sử hoạt động</h1>
             </div>
-        </header>
+        </header> -->
 
         <div class="filter-bar">
             <div class="search-group">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="input-with-icon">
                     <i class="fa-solid fa-clock"></i>
-                    <input type="time">
+                    <input type="time" step="1">
                 </div>
                 <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
 
@@ -97,7 +97,7 @@ function formatDate(dateStr) {
 
     const dd = String(date.getDate()).padStart(2, "0");
     const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const yy = String(date.getFullYear()).slice(-2);
+    const yy = String(date.getFullYear());
 
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");

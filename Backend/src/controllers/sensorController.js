@@ -39,7 +39,7 @@ exports.getAllData = async (req, res) => {
         }
 
         // 4️⃣ Sắp xếp mới nhất lên đầu
-        sql += ` ORDER BY ds.CreatedAt DESC `;
+        sql += ` ORDER BY ds.CreatedAt DESC, ds.ID DESC `;
 
         // 5️⃣ Phân trang
         if (limit && page) {

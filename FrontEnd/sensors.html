@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>IoT - Data Sensors</title>
@@ -15,7 +15,7 @@
             </div>
 
             <div class="nav-links">
-                <a href="index.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="dashboard.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
                 <a href="sensors.html" class="active"><i class="fa-solid fa-database"></i> Data Sensors</a>
                 <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
                 <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
@@ -23,11 +23,11 @@
         </nav>
 
         <div class="container">
-             <header class="main-header">
+             <!-- <header class="main-header">
                 <div class="title-area">
                     <h1>Bảng dữ liệu cảm biến</h1>
                 </div>
-            </header>
+            </header> -->
             <div class="filter-bar">
                 <div class="search-group">
                     <div class="input-with-icon">
@@ -42,9 +42,9 @@
                 </div>
                 <select class="sensor-filter">
                     <option value="all">Tất cả cảm biến</option>
-                    <option value="temp">nhiệt độ</option>
-                    <option value="humid">độ ẩm</option>
-                    <option value="light">ánh sáng</option>
+                    <option value="temp">Nhiệt độ</option>
+                    <option value="humid">Độ ẩm</option>
+                    <option value="light">Ánh sáng</option>
                 </select>
             </div>
 
@@ -97,7 +97,7 @@ function formatDate(dateStr) {
 
     const dd = String(date.getDate()).padStart(2, "0");
     const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const yy = String(date.getFullYear()).slice(-2);
+    const yy = String(date.getFullYear());
 
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");
@@ -154,12 +154,14 @@ function renderTable(data) {
 
     let html = "";
 
-    data.forEach(item => {
+    data.forEach((item, index)=> {
         html += `
             <tr>
                 <td>#${item.ID}</td>
                 <td>${item.SensorName}</td>
-                <td class="sensor-val">${item.Value}</td>
+                <td class="sensor-val">
+                    ${item.Value}${getUnit(item.SensorName)}
+                </td>
                 <td>${formatDate(item.CreatedAt)}</td>
             </tr>
         `;
@@ -168,7 +170,12 @@ function renderTable(data) {
     tableBody.innerHTML = html;
 }
 
-
+function getUnit(sensorName) {
+    if (sensorName === "Nhiệt độ") return "°C";
+    if (sensorName === "Độ ẩm") return "%";
+    if (sensorName === "Ánh sáng") return " lx";
+    return "";
+}
 // =======================
 // RENDER PAGINATION
 // =======================
@@ -196,14 +203,9 @@ function renderPagination(totalPages) {
 
     container.appendChild(prevBtn);
 
-    // ======================
-    // HIỂN THỊ 3 TRANG
-    // ======================
-
     let startPage = Math.max(1, currentPage - 1);
     let endPage = Math.min(totalPages, startPage + 2);
 
-    // Nếu gần cuối thì đẩy lại cho đủ 3 trang
     if (endPage - startPage < 2) {
         startPage = Math.max(1, endPage - 2);
     }

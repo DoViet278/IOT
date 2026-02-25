@@ -38,7 +38,7 @@ exports.getAllData = async (req, res) => {
             queryParams.push(status);
         }
 
-        sql += ` ORDER BY ah.CreatedAt DESC `;
+        sql += ` ORDER BY ah.CreatedAt DESC, ah.ID DESC `;
 
         const parsedLimit = limit ? parseInt(limit) : 10;
         const parsedPage = page ? parseInt(page) : 1;
