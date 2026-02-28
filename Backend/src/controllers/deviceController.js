@@ -97,7 +97,6 @@ exports.getAllData = async (req, res) => {
 // [GET] /api/devices/status
 exports.getLatestDeviceStatus = async (req, res) => {
     try {
-
         const sql = `
             SELECT t.ID_Device, t.Action, t.Status
             FROM actionshistory t
@@ -159,7 +158,7 @@ exports.controlDevice = async (req, res) => {
 
         const historyId = result.insertId;
 
-        const topic = "device/control";
+        const topic = process.env.TOPIC_CONTROL;
         const payload = JSON.stringify({ DeviceID, Action });
 
         mqttClient.publish(topic, payload, { qos: 1 });
@@ -178,7 +177,7 @@ exports.controlDevice = async (req, res) => {
                     [historyId]
                 );
 
-                io.emit('device_status_update', {
+                io.emit('update_status', {
                     DeviceID,
                     Status: 'Fail',
                     Action,

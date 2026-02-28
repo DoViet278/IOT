@@ -17,7 +17,7 @@ const mqttClient = mqtt.connect(process.env.MQTT_BROKER, options);
 mqttClient.on('connect', () => {
     console.log('--- MQTT Connected ---');
     
-    const topics = [process.env.MQTT_TOPIC, 'device/confirm', 'device/init'];
+    const topics = [process.env.MQTT_TOPIC, process.env.TOPIC_RESPONSE, process.env.TOPIC_INIT];
     
     mqttClient.subscribe(topics, (err) => {
         if (!err) {
@@ -63,7 +63,7 @@ mqttClient.on('message', async (topic, message) => {
                 console.log(`[SENSOR] T:${temperature} H:${humidity} L:${light}`);
             }
         }
-        else if (topic === 'device/confirm') {
+        else if (topic === process.env.TOPIC_RESPONSE) {
 
             const { DeviceID } = data;
 
@@ -90,7 +90,7 @@ mqttClient.on('message', async (topic, message) => {
                     [historyId]
                 );
 
-                io.emit('device_status_update', {
+                io.emit('update_status', {
                     DeviceID,
                     Status: 'Success',
                     Action: data.Action || 'Unknown'
@@ -99,7 +99,7 @@ mqttClient.on('message', async (topic, message) => {
                 console.log(`[CONFIRM] Device ${DeviceID} Success`);
             }
         }
-        else if (topic === 'device/init') {
+        else if (topic === process.env.TOPIC_INIT) {
 
             const { DeviceID, Action, Status } = data;
 
@@ -110,7 +110,7 @@ mqttClient.on('message', async (topic, message) => {
                 [DeviceID, Action, Status]
             );
 
-            io.emit('device_status_update', {
+            io.emit('update_status', {
                 DeviceID,
                 Status,
                 Action

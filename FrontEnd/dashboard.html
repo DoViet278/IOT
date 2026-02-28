@@ -199,7 +199,6 @@ function pushData(index, value) {
 }
 
 socket.on("sensorData", (data) => {
-    console.log("Nhận sensor:", data);
 
     if (chart.data.labels.length >= MAX_POINTS) {
         chart.data.labels.shift();
@@ -314,7 +313,7 @@ Object.keys(switches).forEach(id => {
 
 
 // ================= SOCKET REALTIME UPDATE =================
-socket.on("device_status_update", (data) => {
+socket.on("update_status", (data) => {
 
     console.log("Realtime device:", data);
 
