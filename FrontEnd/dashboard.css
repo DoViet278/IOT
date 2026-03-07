@@ -14,15 +14,12 @@ body {
     background-position: center;
     background-attachment: fixed;
     color: var(--text-main);
-    /* overflow: hidden; */
 }
 
-/* Layout */
 .layout {
     display: flex;
 }
 
-/* Sidebar */
 .navbar {
     width: 240px;
     min-height: 100vh;
@@ -66,14 +63,12 @@ body {
     color: var(--primary-green);
 }
 
-/* Content */
 .container {
     margin-left: 260px;
     padding: 30px;
     width: 100%;
 }
 
-/* Header */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -99,7 +94,6 @@ body {
     border-radius: 20px;
 }
 
-/* Cards */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3,1fr);
@@ -108,8 +102,8 @@ body {
 }
 
 .card {
-    padding: 15px 20px;   /* Giảm padding */
-    border-radius: 12px;  /* Bo góc nhỏ lại */
+    padding: 15px 20px;   
+    border-radius: 12px; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -124,7 +118,6 @@ body {
 .humid { background: linear-gradient(135deg,#007adf,#00ecbc); }
 .light { background: linear-gradient(135deg,#f83600,#f9d423); }
 
-/* Chart */
 .chart-container {
     background: var(--card-bg);
     padding: 20px;
@@ -133,17 +126,13 @@ body {
     width: 1000px;
 }
 
-
-
-/* Controls */
 .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; } 
 .control-card { background: var(--card-bg); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 15px; } 
-.control-card i { font-size: 35px; transition: all 0.3s ease; } /* Màu Vàng cho Đèn */ 
-.icon-light { color: #f1c40f; filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.5)); } /* Màu Cam cho Quạt */ 
-.icon-fan { color: #e67e22; filter: drop-shadow(0 0 8px rgba(230, 126, 34, 0.5)); } /* Màu Xanh Dương cho Điều Hòa */
+.control-card i { font-size: 35px; transition: all 0.3s ease; } 
+.icon-light { color: #f1c40f; filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.5)); }  
+.icon-fan { color: #e67e22; filter: drop-shadow(0 0 8px rgba(230, 126, 34, 0.5)); } 
  .icon-air { color: #3498db; filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.5)); }
 
-/* Switch */
 .switch {
     position: relative;
     display: inline-block;
@@ -182,19 +171,17 @@ input:checked + .slider:before {
     transform: translateX(30px);
 }
 
-/* Chart + Controls nằm ngang */
 .chart-section {
     display: flex;
     gap: 25px;
     margin-bottom: 30px;
 }
 
-/* Biểu đồ chiếm nhiều diện tích hơn */
 .chart-container {
     flex: 3;
 }
 
-/* Controls dọc bên phải */
+
 .controls-vertical {
     flex: 1;
     display: flex;
@@ -202,7 +189,6 @@ input:checked + .slider:before {
     gap: 20px;
 }
 
-/* Card nhỏ lại cho đẹp */
 .controls-vertical .control-card {
     padding: 20px;
 }

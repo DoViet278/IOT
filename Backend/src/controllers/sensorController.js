@@ -15,18 +15,18 @@ exports.getAllData = async (req, res) => {
             WHERE 1=1
         `;
 
-        // 1️⃣ Lọc theo khoảng thời gian
+        //Lọc theo khoảng thời gian
         if (range === '30days') {
             sql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 30 DAY) `;
         }
 
-        // 2️⃣ Lọc theo tên Sensor
+        //Lọc theo tên Sensor
         if (sensor) {
             sql += ` AND s.Name = ? `;
             queryParams.push(sensor);
         }
 
-        // 3️⃣ Search theo Value hoặc thời gian
+        //Search theo Value hoặc thời gian
         if (search) {
             sql += `
                 AND (
@@ -38,10 +38,10 @@ exports.getAllData = async (req, res) => {
             queryParams.push(searchPattern, searchPattern);
         }
 
-        // 4️⃣ Sắp xếp mới nhất lên đầu
+        //Sắp xếp mới nhất lên đầu
         sql += ` ORDER BY ds.CreatedAt DESC, ds.ID DESC `;
 
-        // 5️⃣ Phân trang
+        //Phân trang
         if (limit && page) {
 
             const parsedLimit = parseInt(limit);
@@ -58,9 +58,7 @@ exports.getAllData = async (req, res) => {
 
         const [rows] = await db.query(sql, queryParams);
 
-        // ==============================
         // COUNT tổng số bản ghi (có filter)
-        // ==============================
         let total = rows.length;
 
         if (limit && page) {

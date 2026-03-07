@@ -89,9 +89,7 @@ const timeInput = document.querySelector("input[type='time']");
 const sensorFilter = document.querySelector(".sensor-filter");
 
 
-// =======================
-// FORMAT dd/mm/yy HH:mm:ss
-// =======================
+// FORMAT dd/mm/yyyy HH:mm:ss
 function formatDate(dateStr) {
     const date = new Date(dateStr);
 
@@ -107,9 +105,7 @@ function formatDate(dateStr) {
 }
 
 
-// =======================
 // LOAD DATA
-// =======================
 async function loadData() {
 
     const params = new URLSearchParams({
@@ -138,9 +134,7 @@ async function loadData() {
 }
 
 
-// =======================
 // RENDER TABLE
-// =======================
 function renderTable(data) {
 
     if (!data || data.length === 0) {
@@ -176,9 +170,7 @@ function getUnit(sensorName) {
     if (sensorName === "Ánh sáng") return " lx";
     return "";
 }
-// =======================
 // RENDER PAGINATION
-// =======================
 function renderPagination(totalPages) {
 
     const container = document.getElementById("pagination");
@@ -186,9 +178,6 @@ function renderPagination(totalPages) {
 
     if (totalPages <= 1) return;
 
-    // ======================
-    // PREVIOUS BUTTON
-    // ======================
     const prevBtn = document.createElement("button");
     prevBtn.className = "page-btn";
     prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
@@ -228,9 +217,6 @@ function renderPagination(totalPages) {
         container.appendChild(btn);
     }
 
-    // ======================
-    // NEXT BUTTON
-    // ======================
     const nextBtn = document.createElement("button");
     nextBtn.className = "page-btn";
     nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
@@ -247,9 +233,7 @@ function renderPagination(totalPages) {
 }
 
 
-// =======================
 // SEARCH
-// =======================
 searchBtn.addEventListener("click", () => {
 
     const date = dateInput.value;
@@ -270,9 +254,7 @@ searchBtn.addEventListener("click", () => {
 });
 
 
-// =======================
 // FILTER SENSOR
-// =======================
 sensorFilter.addEventListener("change", () => {
 
     const value = sensorFilter.value;
@@ -287,9 +269,7 @@ sensorFilter.addEventListener("change", () => {
 });
 
 
-// =======================
 // INIT
-// =======================
 loadData();
 
 </script>

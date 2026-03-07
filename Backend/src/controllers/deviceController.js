@@ -6,7 +6,7 @@ const timers = global.deviceTimers || {};
 const io = getIO();
 
 
-// [GET] /api/devices
+// [GET] /api/devices/data
 exports.getAllData = async (req, res) => {
     try {
         const { search, deviceId, status, limit, page } = req.query;
@@ -95,7 +95,7 @@ exports.getAllData = async (req, res) => {
 
 
 // [GET] /api/devices/status
-exports.getLatestDeviceStatus = async (req, res) => {
+exports.getLatestStatus = async (req, res) => {
     try {
         const sql = `
             SELECT t.ID_Device, t.Action, t.Status

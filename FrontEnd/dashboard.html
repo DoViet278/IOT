@@ -115,7 +115,7 @@ const API_BASE = "http://localhost:3001/api/devices";
 const socket = io("http://localhost:3001");
 
 socket.on("connect", () => {
-    console.log("✅ Đã kết nối Socket:", socket.id);
+    console.log("Đã kết nối Socket:", socket.id);
 });
 
 const ctx = document.getElementById('iotChart').getContext('2d');

@@ -11,9 +11,9 @@
 
 body {
     background-image: url('1.png');
-    background-size: cover;         /* Kéo ảnh để vừa khít màn hình */
-    background-repeat: no-repeat;   /* Không lặp lại ảnh */
-    background-position: center;    /* Căn ảnh vào giữa */
+    background-size: cover;         
+    background-repeat: no-repeat;  
+    background-position: center;    
     background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Segoe UI', sans-serif;
@@ -21,7 +21,6 @@ body {
     padding-bottom: 50px;
 }
 
-/* Header Navigation */
 .layout {
     display: flex;
 }
@@ -88,9 +87,9 @@ body {
 
 .title-area h1 {
     color: var(--primary-green);
-    margin: 0; /* Giúp căn chỉnh đẹp hơn với icon */
-    font-size: 2.2rem; /* Có thể tăng nhẹ kích thước để nổi bật hơn */
-    text-shadow: 0 0 15px rgba(46, 204, 113, 0.3); /* Thêm hiệu ứng phát sáng nhẹ cho đồng bộ với các card */
+    margin: 0;
+    font-size: 2.2rem;
+    text-shadow: 0 0 15px rgba(46, 204, 113, 0.3); 
 }
 
 .leaf-icon {
@@ -106,7 +105,6 @@ body {
     border: 1px solid var(--primary-green);
 }
 
-/* Cards */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -129,7 +127,6 @@ body {
 .light { background: var(--light-grad); }
 .card i { font-size: 40px; opacity: 0.8; }
 
-/* Chart */
 .chart-container {
     background: var(--card-bg);
     padding: 20px;
@@ -137,7 +134,6 @@ body {
     margin-bottom: 30px;
 }
 
-/* Switches */
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -198,7 +194,7 @@ input:checked + .slider:before { transform: translateX(30px); }
 .avatar-container img {
     width: 180px;
     height: 180px;
-    border-radius: 40px; /* Bo góc theo ảnh */
+    border-radius: 40px; 
     border: 3px solid #2a3a4a;
     margin-bottom: 20px;
     object-fit: cover;

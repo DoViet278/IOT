@@ -23,11 +23,6 @@
         </nav>
 
     <div class="container">
-        <!-- <header class="main-header">
-            <div class="title-area">
-                <h1>Lịch sử hoạt động</h1>
-            </div>
-        </header> -->
 
         <div class="filter-bar">
             <div class="search-group">
@@ -73,7 +68,7 @@
     </div>
    </div>
    <script>
-const API_BASE = "http://localhost:3001/api/devices";
+const API_BASE = "http://localhost:3001/api/devices/data";
 
 let currentPage = 1;
 let currentSearch = "";
@@ -89,9 +84,7 @@ const timeInput = document.querySelector("input[type='time']");
 const deviceFilter = document.querySelector(".sensor-filter");
 
 
-// =======================
-// FORMAT DATE dd/mm/yy HH:mm:ss
-// =======================
+// FORMAT DATE dd/mm/yyyy HH:mm:ss
 function formatDate(dateStr) {
     const date = new Date(dateStr);
 
@@ -107,9 +100,7 @@ function formatDate(dateStr) {
 }
 
 
-// =======================
 // LOAD DATA
-// =======================
 async function loadData() {
 
     const params = new URLSearchParams({
@@ -133,9 +124,7 @@ async function loadData() {
 }
 
 
-// =======================
 // RENDER TABLE
-// =======================
 function renderTable(data) {
 
     if (!data || data.length === 0) {
@@ -182,9 +171,7 @@ function renderTable(data) {
 }
 
 
-// =======================
-// PAGINATION (3 PAGE STYLE)
-// =======================
+// PAGINATION 
 function renderPagination(totalPages) {
 
     paginationContainer.innerHTML = "";
@@ -246,9 +233,7 @@ function renderPagination(totalPages) {
 }
 
 
-// =======================
 // SEARCH
-// =======================
 searchBtn.addEventListener("click", () => {
 
     const date = dateInput.value;
@@ -265,9 +250,8 @@ searchBtn.addEventListener("click", () => {
 });
 
 
-// =======================
+
 // FILTER DEVICE
-// =======================
 deviceFilter.addEventListener("change", () => {
 
     const value = deviceFilter.value;
@@ -282,7 +266,6 @@ deviceFilter.addEventListener("change", () => {
 });
 
 
-// INIT
 loadData();
 
 </script>
