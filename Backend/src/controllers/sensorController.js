@@ -1,8 +1,8 @@
 const db = require('../config/db');
 
 
-// [GET] /api/sensors?range=30days&search=&sensor=&limit=&page=
-exports.getAllData = async (req, res) => {
+// [GET] /api/sensors?range=10days&search=&sensor=&limit=&page=
+exports.getAllDataSensors = async (req, res) => {
     try {
         const { range, search, sensor, limit, page } = req.query;
 
@@ -16,8 +16,8 @@ exports.getAllData = async (req, res) => {
         `;
 
         //Lọc theo khoảng thời gian
-        if (range === '30days') {
-            sql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 30 DAY) `;
+        if (range === '10days') {
+            sql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 10 DAY) `;
         }
 
         //Lọc theo tên Sensor
@@ -72,8 +72,8 @@ exports.getAllData = async (req, res) => {
 
             let countParams = [];
 
-            if (range === '30days') {
-                countSql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 30 DAY) `;
+            if (range === '10days') {
+                countSql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 10 DAY) `;
             }
 
             if (sensor) {

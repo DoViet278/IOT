@@ -3,12 +3,16 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const socketStorage = require('./socket'); // Import file vừa tạo
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
+// Swagger endpoint
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // KHỞI TẠO SOCKET TẠI ĐÂY
 socketStorage.init(server); 

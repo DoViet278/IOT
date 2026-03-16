@@ -189,7 +189,7 @@ exports.controlDevice = async (req, res) => {
 
             delete timers[historyId];
 
-        }, 120000);
+        }, 10000);
 
         res.status(200).json({
             message: "Lệnh đã được gửi, đang chờ phản hồi...",

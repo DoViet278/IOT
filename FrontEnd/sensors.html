@@ -23,20 +23,15 @@
         </nav>
 
         <div class="container">
-             <!-- <header class="main-header">
-                <div class="title-area">
-                    <h1>Bảng dữ liệu cảm biến</h1>
-                </div>
-            </header> -->
             <div class="filter-bar">
                 <div class="search-group">
                     <div class="input-with-icon">
                         <i class="fa-solid fa-calendar"></i>
-                        <input type="date">
+                        <input type="text" id="date-input" placeholder="dd/mm/yyyy">
                     </div>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-clock"></i>
-                        <input type="time" step="1">
+                        <input type="text" placeholder="hh:mm:ss" id="time-input">
                     </div>
                     <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
                 </div>
@@ -84,12 +79,24 @@ const limit = 10;
 const tableBody = document.getElementById("sensor-data");
 const paginationContainer = document.querySelector(".pagination");
 const searchBtn = document.querySelector(".btn-search");
-const dateInput = document.querySelector("input[type='date']");
-const timeInput = document.querySelector("input[type='time']");
+const dateInput = document.getElementById("date-input");
+const timeInput = document.getElementById("time-input");
 const sensorFilter = document.querySelector(".sensor-filter");
 
+function isValidTime(time) {
+    return /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(time);
+}
 
-// FORMAT dd/mm/yyyy HH:mm:ss
+function isValidDate(date) {
+    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/.test(date);
+}
+
+function convertDate(date) {
+    const [dd, mm, yyyy] = date.split("/");
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+// FORMAT dd/mm/yyyy hh:mm:ss
 function formatDate(dateStr) {
     const date = new Date(dateStr);
 
@@ -239,12 +246,17 @@ searchBtn.addEventListener("click", () => {
     const date = dateInput.value;
     const time = timeInput.value;
 
-    if (date) {
-        const searchString = time
-            ? `${date} ${time}`
-            : date;
+    if (time && !isValidTime(time)) {
+        alert("Giờ phải đúng định dạng HH:mm:ss");
+        return;
+    }
 
-        currentSearch = searchString;
+    if (date) {
+
+        const sqlDate = convertDate(date);
+
+        currentSearch = time ? `${sqlDate} ${time}` : sqlDate;
+
     } else {
         currentSearch = "";
     }

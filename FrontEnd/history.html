@@ -23,16 +23,15 @@
         </nav>
 
     <div class="container">
-
         <div class="filter-bar">
             <div class="search-group">
                 <div class="input-with-icon">
                     <i class="fa-solid fa-calendar"></i>
-                    <input type="date">
+                    <input type="text" id="date-input" placeholder="dd/mm/yyyy">
                 </div>
                 <div class="input-with-icon">
                     <i class="fa-solid fa-clock"></i>
-                    <input type="time" step="1">
+                    <input type="text" placeholder="hh:mm:ss" id="time-input">
                 </div>
                 <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
 
@@ -67,7 +66,7 @@
         </div>
     </div>
    </div>
-   <script>
+<script>
 const API_BASE = "http://localhost:3001/api/devices/data";
 
 let currentPage = 1;
@@ -79,11 +78,17 @@ const tableBody = document.getElementById("history-data");
 const paginationContainer = document.getElementById("pagination");
 
 const searchBtn = document.querySelector(".btn-search");
-const dateInput = document.querySelector("input[type='date']");
-const timeInput = document.querySelector("input[type='time']");
+const dateInput = document.getElementById("date-input");
+const timeInput = document.getElementById("time-input");
 const deviceFilter = document.querySelector(".sensor-filter");
 
+function isValidTime(time) {
+    return /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(time);
+}
 
+function isValidDate(date) {
+    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/.test(date);
+}
 // FORMAT DATE dd/mm/yyyy HH:mm:ss
 function formatDate(dateStr) {
     const date = new Date(dateStr);
@@ -98,7 +103,10 @@ function formatDate(dateStr) {
 
     return `${dd}/${mm}/${yy} ${hh}:${min}:${ss}`;
 }
-
+function convertDate(date) {
+    const [dd, mm, yyyy] = date.split("/");
+    return `${yyyy}-${mm}-${dd}`;
+}
 
 // LOAD DATA
 async function loadData() {
@@ -239,8 +247,22 @@ searchBtn.addEventListener("click", () => {
     const date = dateInput.value;
     const time = timeInput.value;
 
-    if (date) {
-        currentSearch = time ? `${date} ${time}` : date;
+     if (date && !isValidDate(date)) {
+        alert("Ngày phải đúng định dạng dd/mm/yyyy");
+        return;
+    }
+
+     if (time && !isValidTime(time)) {
+        alert("Giờ phải đúng định dạng HH:mm:ss");
+        return;
+    }
+
+   if (date) {
+
+        const sqlDate = convertDate(date);
+
+        currentSearch = time ? `${sqlDate} ${time}` : sqlDate;
+
     } else {
         currentSearch = "";
     }
@@ -248,7 +270,6 @@ searchBtn.addEventListener("click", () => {
     currentPage = 1;
     loadData();
 });
-
 
 
 // FILTER DEVICE
