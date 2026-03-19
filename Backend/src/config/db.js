@@ -11,9 +11,6 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Chuyển sang dạng Promise để dùng async/await cho mượt
 const db = pool.promise();
-
-console.log('MySQL Pool đã được khởi tạo');
 
 module.exports = db;

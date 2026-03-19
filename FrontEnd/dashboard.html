@@ -110,9 +110,9 @@
 </div>
 
 <script>
-const API_URL = "http://localhost:3001/api/sensors?limit=30&page=1";
-const API_BASE = "http://localhost:3001/api/devices";
-const socket = io("http://localhost:3001");
+const API_SENSORS = "http://localhost:5000/api/sensors/recent";
+const API_DEVICES = "http://localhost:5000/api/devices";
+const socket = io("http://localhost:5000");
 
 socket.on("connect", () => {
     console.log("Đã kết nối Socket:", socket.id);
@@ -158,9 +158,8 @@ const MAX_POINTS = 10;
 // ================= LOAD DATA BAN ĐẦU =================
 async function loadInitialData() {
     try {
-        const res = await fetch(API_URL);
-        const result = await res.json();
-        const data = result.data;
+        const res = await fetch(API_SENSORS);
+        const data = await res.json();
 
         const tempData = data.filter(d => d.SensorName === "nhiệt độ").slice(0,10).reverse();
         const humidData = data.filter(d => d.SensorName === "độ ẩm").slice(0,10).reverse();
@@ -245,7 +244,7 @@ const switches = {
 // ================= LOAD TRẠNG THÁI BAN ĐẦU =================
 async function loadDeviceStatus() {
     try {
-        const res = await fetch(`${API_BASE}/status`);
+        const res = await fetch(`${API_DEVICES}/status`);
         const data = await res.json();
 
         Object.keys(data).forEach(id => {
@@ -267,7 +266,7 @@ async function sendControl(DeviceID, isOn) {
     const Action = isOn ? "ON" : "OFF";
 
     try {
-        await fetch(`${API_BASE}/control`, {
+        await fetch(`${API_DEVICES}/control`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ DeviceID, Action })

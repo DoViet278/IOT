@@ -15,10 +15,14 @@ const options = {
 const mqttClient = mqtt.connect(process.env.MQTT_BROKER, options);
 
 mqttClient.on('connect', () => {
-    console.log('--- MQTT Connected ---');
-    
-    const topics = [process.env.MQTT_TOPIC, process.env.TOPIC_RESPONSE, process.env.TOPIC_INIT];
-    
+    console.log('MQTT Connected');
+
+    const topics = [
+        process.env.MQTT_TOPIC,        // DataSensors
+        process.env.TOPIC_RESPONSE,    // DeviceResponse
+        process.env.TOPIC_SYNC_REQUEST 
+    ];
+
     mqttClient.subscribe(topics, (err) => {
         if (!err) {
             console.log(`Đã subscribe: ${topics.join(', ')}`);
@@ -33,6 +37,7 @@ mqttClient.on('message', async (topic, message) => {
 
     try {
         const data = JSON.parse(payload);
+
         if (topic === process.env.MQTT_TOPIC) {
             const { temperature, humidity, light } = data;
 
@@ -63,6 +68,7 @@ mqttClient.on('message', async (topic, message) => {
                 console.log(`[SENSOR] T:${temperature} H:${humidity} L:${light}`);
             }
         }
+
         else if (topic === process.env.TOPIC_RESPONSE) {
 
             const { DeviceID } = data;
@@ -99,24 +105,40 @@ mqttClient.on('message', async (topic, message) => {
                 console.log(`[CONFIRM] Device ${DeviceID} Success`);
             }
         }
-        else if (topic === process.env.TOPIC_INIT) {
+        else if (topic === process.env.TOPIC_SYNC_REQUEST) {
 
-            const { DeviceID, Action, Status } = data;
+            console.log("[SYNC] Request received");
 
-            await db.query(
-                `INSERT INTO actionshistory 
-                (ID_Device, Action, Status, CreatedAt) 
-                VALUES (?, ?, ?, NOW())`,
-                [DeviceID, Action, Status]
-            );
+            const [rows] = await db.query(`
+                SELECT t.ID_Device, t.Action, t.Status
+                FROM actionshistory t
+                INNER JOIN (
+                    SELECT ID_Device, MAX(ID) as MaxID
+                    FROM actionshistory
+                    GROUP BY ID_Device
+                ) latest ON t.ID = latest.MaxID
+            `);
 
-            io.emit('update_status', {
-                DeviceID,
-                Status,
-                Action
+            const devices = [];
+
+            rows.forEach(item => {
+                let action = "OFF";
+
+                if (item.Status === "Success") {
+                    action = item.Action;
+                }
+
+                devices.push({
+                    DeviceID: item.ID_Device,
+                    Action: action
+                });
             });
 
-            console.log(`[INIT] Device ${DeviceID} ${Action}`);
+            mqttClient.publish(process.env.TOPIC_SYNC, JSON.stringify({
+                devices
+            }));
+
+            console.log("[SYNC] Sent to ESP");
         }
 
     } catch (err) {
