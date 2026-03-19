@@ -9,82 +9,60 @@ const io = getIO();
 // [GET] /api/devices/data
 exports.getAllData = async (req, res) => {
     try {
-        const { search, deviceId, status, limit, page } = req.query;
+        const { search, deviceId, status, limit = 10, page = 1 } = req.query;
 
-        let queryParams = [];
+        const parsedLimit = parseInt(limit);
+        const parsedPage = parseInt(page);
+        const offset = (parsedPage - 1) * parsedLimit;
+        
+        let conditions = [];
+        let params = [];
 
-        let sql = `
+        if (search) {
+            conditions.push(`DATE_FORMAT(ah.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?`);
+            params.push(`%${search}%`);
+        }
+
+        if (deviceId) {
+            conditions.push(`d.ID = ?`);
+            params.push(deviceId);
+        }
+
+        if (status) {
+            conditions.push(`ah.Status = ?`);
+            params.push(status);
+        }
+
+        const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+        // Query chính
+        const dataSql = `
             SELECT ah.ID, d.Name as DeviceName, ah.Action, ah.Status, ah.CreatedAt
             FROM actionshistory ah
             JOIN device d ON ah.ID_Device = d.ID
-            WHERE 1=1
+            ${whereClause}
+            ORDER BY ah.CreatedAt DESC, ah.ID DESC
+            LIMIT ? OFFSET ?
         `;
 
-        // Search theo thời gian
-        if (search) {
-            sql += ` AND DATE_FORMAT(ah.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ? `;
-            queryParams.push(`%${search}%`);
-        }
+        const [rows] = await db.query(dataSql, [...params, parsedLimit, offset]);
 
-        // Lọc theo Device
-        if (deviceId) {
-            sql += ` AND d.ID = ? `;
-            queryParams.push(deviceId);
-        }
-
-        // Lọc theo Status
-        if (status) {
-            sql += ` AND ah.Status = ? `;
-            queryParams.push(status);
-        }
-
-        sql += ` ORDER BY ah.CreatedAt DESC, ah.ID DESC `;
-
-        const parsedLimit = limit ? parseInt(limit) : 10;
-        const parsedPage = page ? parseInt(page) : 1;
-
-        if (limit && page) {
-            const offset = (parsedPage - 1) * parsedLimit;
-            sql += ` LIMIT ? OFFSET ? `;
-            queryParams.push(parsedLimit, offset);
-        }
-
-        const [rows] = await db.query(sql, queryParams);
-
-        // COUNT
-        let countSql = `
+        // Query count 
+        const countSql = `
             SELECT COUNT(*) as total
             FROM actionshistory ah
             JOIN device d ON ah.ID_Device = d.ID
-            WHERE 1=1
+            ${whereClause}
         `;
 
-        let countParams = [];
-
-        if (search) {
-            countSql += ` AND DATE_FORMAT(ah.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ? `;
-            countParams.push(`%${search}%`);
-        }
-
-        if (deviceId) {
-            countSql += ` AND d.ID = ? `;
-            countParams.push(deviceId);
-        }
-
-        if (status) {
-            countSql += ` AND ah.Status = ? `;
-            countParams.push(status);
-        }
-
-        const [totalRows] = await db.query(countSql, countParams);
+        const [totalRows] = await db.query(countSql, params);
 
         const total = totalRows[0].total;
-        const totalPages = Math.ceil(total / parsedLimit);
 
         res.json({
             data: rows,
             total,
-            totalPages,
+            totalPages: Math.ceil(total / parsedLimit),
             currentPage: parsedPage
         });
 
@@ -142,62 +120,76 @@ exports.getLatestStatus = async (req, res) => {
 
 // [POST] /api/devices/control
 exports.controlDevice = async (req, res) => {
-
-    const { DeviceID, Action } = req.body;
-
-    if (!DeviceID || !Action) {
-        return res.status(400).json({ message: "Thiếu DeviceID hoặc Action" });
-    }
-
     try {
-        const [result] = await db.query(
-            `INSERT INTO actionshistory (ID_Device, Action, Status, CreatedAt)
-             VALUES (?, ?, 'Processing', NOW())`,
-            [DeviceID, Action]
-        );
+        const { DeviceID, Action } = req.body;
 
+        // 1. Validate
+        if (!DeviceID || !Action) {
+            return res.status(400).json({
+                message: "Thiếu DeviceID hoặc Action"
+            });
+        }
+
+        // 2. Lưu lịch sử (Processing)
+        const insertSql = `
+            INSERT INTO actionshistory (ID_Device, Action, Status, CreatedAt)
+            VALUES (?, ?, 'Processing', NOW())
+        `;
+
+        const [result] = await db.query(insertSql, [DeviceID, Action]);
         const historyId = result.insertId;
 
+        // 3. Publish MQTT
         const topic = process.env.TOPIC_CONTROL;
         const payload = JSON.stringify({ DeviceID, Action });
 
         mqttClient.publish(topic, payload, { qos: 1 });
 
-        timers[historyId] = setTimeout(async () => {
-
-            const [check] = await db.query(
-                "SELECT Status FROM actionshistory WHERE ID = ?",
-                [historyId]
-            );
-
-            if (check[0] && check[0].Status === 'Processing') {
-
-                await db.query(
-                    "UPDATE actionshistory SET Status = 'Fail' WHERE ID = ?",
+        // 4. Timeout xử lý Fail
+        const handleTimeout = async () => {
+            try {
+                const [rows] = await db.query(
+                    "SELECT Status FROM actionshistory WHERE ID = ?",
                     [historyId]
                 );
 
-                io.emit('update_status', {
-                    DeviceID,
-                    Status: 'Fail',
-                    Action,
-                    Message: 'Timeout'
-                });
+                const currentStatus = rows[0]?.Status;
 
-                console.log(`[TIMEOUT] HistoryID ${historyId} -> Fail`);
+                if (currentStatus === "Processing") {
+                    await db.query(
+                        "UPDATE actionshistory SET Status = 'Fail' WHERE ID = ?",
+                        [historyId]
+                    );
+
+                    io.emit("update_status", {
+                        DeviceID,
+                        Status: "Fail",
+                        Action,
+                        Message: "Timeout"
+                    });
+
+                    console.log(`[TIMEOUT] HistoryID ${historyId} -> Fail`);
+                }
+            } catch (err) {
+                console.error("Timeout error:", err);
+            } finally {
+                delete timers[historyId];
             }
+        };
 
-            delete timers[historyId];
+        timers[historyId] = setTimeout(handleTimeout, 10000);
 
-        }, 10000);
-
-        res.status(200).json({
+        // 5. Response
+        return res.status(200).json({
             message: "Lệnh đã được gửi, đang chờ phản hồi...",
             historyId
         });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Lỗi Server", error: error.message });
+        console.error("ControlDevice Error:", error);
+        return res.status(500).json({
+            message: "Lỗi Server",
+            error: error.message
+        });
     }
 };

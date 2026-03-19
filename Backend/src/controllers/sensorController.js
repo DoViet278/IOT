@@ -1,109 +1,81 @@
 const db = require('../config/db');
 
-
 // [GET] /api/sensors?range=10days&search=&sensor=&limit=&page=
 exports.getAllDataSensors = async (req, res) => {
     try {
         const { range, search, sensor, limit, page } = req.query;
 
-        let queryParams = [];
+        const parsedLimit = limit ? parseInt(limit) : null;
+        const parsedPage = page ? parseInt(page) : null;
+        const offset = parsedLimit && parsedPage ? (parsedPage - 1) * parsedLimit : 0;
 
-        let sql = `
+        // ===== Build WHERE chung =====
+        let conditions = [];
+        let params = [];
+
+        if (range === '10days') {
+            conditions.push(`ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 10 DAY)`);
+        }
+
+        if (sensor) {
+            conditions.push(`s.Name = ?`);
+            params.push(sensor);
+        }
+
+        if (search) {
+            conditions.push(`(
+                ds.Value LIKE ?
+                OR DATE_FORMAT(ds.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?
+            )`);
+            const pattern = `%${search}%`;
+            params.push(pattern, pattern);
+        }
+
+        const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+        // ===== Query data =====
+        let dataSql = `
             SELECT ds.ID, s.Name AS SensorName, ds.Value, ds.CreatedAt
             FROM datasensors ds
             JOIN sensors s ON ds.ID_Ss = s.ID
-            WHERE 1=1
+            ${whereClause}
+            ORDER BY ds.CreatedAt DESC, ds.ID DESC
         `;
 
-        //Lọc theo khoảng thời gian
-        if (range === '10days') {
-            sql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 10 DAY) `;
-        }
-
-        //Lọc theo tên Sensor
-        if (sensor) {
-            sql += ` AND s.Name = ? `;
-            queryParams.push(sensor);
-        }
-
-        //Search theo Value hoặc thời gian
-        if (search) {
-            sql += `
-                AND (
-                    ds.Value LIKE ?
-                    OR DATE_FORMAT(ds.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?
-                )
-            `;
-            const searchPattern = `%${search}%`;
-            queryParams.push(searchPattern, searchPattern);
-        }
-
-        //Sắp xếp mới nhất lên đầu
-        sql += ` ORDER BY ds.CreatedAt DESC, ds.ID DESC `;
-
-        //Phân trang
-        if (limit && page) {
-
-            const parsedLimit = parseInt(limit);
-            const parsedPage = parseInt(page);
-            const offset = (parsedPage - 1) * parsedLimit;
-
-            sql += ` LIMIT ? OFFSET ? `;
-            queryParams.push(parsedLimit, offset);
-
+        // Phân trang hoặc dashboard
+        if (parsedLimit && parsedPage) {
+            dataSql += ` LIMIT ? OFFSET ?`;
         } else {
-            // Nếu gọi từ dashboard
-            sql += ` LIMIT 90 `;
+            dataSql += ` LIMIT 90`;
         }
 
-        const [rows] = await db.query(sql, queryParams);
+        const dataParams = (parsedLimit && parsedPage)
+            ? [...params, parsedLimit, offset]
+            : params;
 
-        // COUNT tổng số bản ghi (có filter)
+        const [rows] = await db.query(dataSql, dataParams);
+
+        // ===== COUNT (chỉ khi có phân trang) =====
         let total = rows.length;
 
-        if (limit && page) {
-
-            let countSql = `
+        if (parsedLimit && parsedPage) {
+            const countSql = `
                 SELECT COUNT(*) as total
                 FROM datasensors ds
                 JOIN sensors s ON ds.ID_Ss = s.ID
-                WHERE 1=1
+                ${whereClause}
             `;
 
-            let countParams = [];
-
-            if (range === '10days') {
-                countSql += ` AND ds.CreatedAt >= DATE_SUB(NOW(), INTERVAL 10 DAY) `;
-            }
-
-            if (sensor) {
-                countSql += ` AND s.Name = ? `;
-                countParams.push(sensor);
-            }
-
-            if (search) {
-                countSql += `
-                    AND (
-                        ds.Value LIKE ?
-                        OR DATE_FORMAT(ds.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?
-                    )
-                `;
-                const searchPattern = `%${search}%`;
-                countParams.push(searchPattern, searchPattern);
-            }
-
-            const [totalRows] = await db.query(countSql, countParams);
+            const [totalRows] = await db.query(countSql, params);
             total = totalRows[0].total;
         }
-
-        const totalPages = (limit && page)
-            ? Math.ceil(total / parseInt(limit))
-            : 1;
 
         res.status(200).json({
             total,
             count: rows.length,
-            totalPages,
+            totalPages: (parsedLimit && parsedPage)
+                ? Math.ceil(total / parsedLimit)
+                : 1,
             data: rows
         });
 
