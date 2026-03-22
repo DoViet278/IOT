@@ -115,6 +115,7 @@ mqttClient.on('message', async (topic, message) => {
                 INNER JOIN (
                     SELECT ID_Device, MAX(ID) as MaxID
                     FROM actionshistory
+                    WHERE Status = 'Success'
                     GROUP BY ID_Device
                 ) latest ON t.ID = latest.MaxID
             `);

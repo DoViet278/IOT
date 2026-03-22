@@ -46,7 +46,7 @@ exports.getAllDataSensors = async (req, res) => {
         if (parsedLimit && parsedPage) {
             dataSql += ` LIMIT ? OFFSET ?`;
         } else {
-            dataSql += ` LIMIT 90`;
+            dataSql += ` LIMIT 30`;
         }
 
         const dataParams = (parsedLimit && parsedPage)

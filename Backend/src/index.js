@@ -25,7 +25,7 @@ const deviceRoutes = require('./routes/deviceRoutes');
 app.use('/api/sensors', sensorRoutes);
 app.use('/api/devices', deviceRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 server.listen(PORT, () => {
     console.log(`BE đang chạy tại http://localhost:${PORT}`);
 });

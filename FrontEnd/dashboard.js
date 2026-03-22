@@ -47,25 +47,30 @@ const MAX_POINTS = 10;
 async function loadInitialData() {
     try {
         const res = await fetch(API_SENSORS);
-        const data = await res.json();
+        const result = await res.json();
+        const data = result.data;
+        console.log(data);
 
-        const tempData = data.filter(d => d.SensorName === "nhiệt độ").slice(0,10).reverse();
-        const humidData = data.filter(d => d.SensorName === "độ ẩm").slice(0,10).reverse();
-        const lightData = data.filter(d => d.SensorName === "ánh sáng").slice(0,10).reverse();
+        const tempData = data.filter(d => d.SensorName === "Nhiệt độ").slice(0,10).reverse();
+        const humidData = data.filter(d => d.SensorName === "Độ ẩm").slice(0,10).reverse();
+        const lightData = data.filter(d => d.SensorName === "Ánh sáng").slice(0,10).reverse();
 
-        if (tempData.length)
-            document.getElementById("tempValue").innerText =
-                tempData[tempData.length - 1].Value + " °C";
+        // if (tempData.length)
+        //     document.getElementById("tempValue").innerText =
+        //         tempData[tempData.length - 1].Value + " °C";
 
-        if (humidData.length)
-            document.getElementById("humidValue").innerText =
-                humidData[humidData.length - 1].Value + " %";
+        // if (humidData.length)
+        //     document.getElementById("humidValue").innerText =
+        //         humidData[humidData.length - 1].Value + " %";
 
-        if (lightData.length)
-            document.getElementById("lightValue").innerText =
-                lightData[lightData.length - 1].Value + " lx";
+        // if (lightData.length)
+        //     document.getElementById("lightValue").innerText =
+        //         lightData[lightData.length - 1].Value + " lx";
 
-        chart.data.labels = tempData.map((_, i) => i + 1);
+        chart.data.labels = tempData.map(d => {
+            const date = new Date(d.CreatedAt);
+            return date.toLocaleTimeString(); // hiển thị giờ:phút:giây
+        });
         chart.data.datasets[0].data = tempData.map(d => d.Value);
         chart.data.datasets[1].data = humidData.map(d => d.Value);
         chart.data.datasets[2].data = lightData.map(d => d.Value);
