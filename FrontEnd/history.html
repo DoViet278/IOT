@@ -27,15 +27,24 @@
             <div class="search-group">
                 <div class="input-with-icon">
                     <i class="fa-solid fa-calendar"></i>
-                    <input type="text" id="date-input" placeholder="dd/mm/yyyy">
-                </div>
-                <div class="input-with-icon">
-                    <i class="fa-solid fa-clock"></i>
-                    <input type="text" placeholder="hh:mm:ss" id="time-input">
+                    <input type="text" id="datetime-input" placeholder="dd/mm/yyyy HH:mm:ss">
                 </div>
                 <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
 
             </div>
+            <select class="action-filter">
+                <option value="">Tất cả hành động</option>
+                <option value="ON">Bật (ON)</option>
+                <option value="OFF">Tắt (OFF)</option>
+            </select>
+
+            <select class="status-filter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Success">Thành công</option>
+                <option value="Processing">Đang xử lý</option>
+                <option value="Fail">Thất bại</option>
+            </select>
+            
             <select class="sensor-filter">
                 <option value="all">Tất cả thiết bị</option>
                 <option value="light">Đèn</option>
@@ -57,13 +66,15 @@
                 </thead>
                 <tbody id="history-data"></tbody>
             </table>
-        </div>
 
+            <div class="table-footer" id="pagination-info"></div>
+        </div>
         <div class="pagination" id="pagination">
             <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="page-btn active">1</button>
             <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
+        
     </div>
    </div>
 <script src="history.js"></script>

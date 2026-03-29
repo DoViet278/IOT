@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// [GET] /api/sensors?range=10days&search=&sensor=&limit=&page=
+// [GET] /api/sensors/data?range=10days&search=&sensor=&limit=&page=
 exports.getAllDataSensors = async (req, res) => {
     try {
         const { range, search, sensor, limit, page } = req.query;
@@ -9,7 +9,6 @@ exports.getAllDataSensors = async (req, res) => {
         const parsedPage = page ? parseInt(page) : null;
         const offset = parsedLimit && parsedPage ? (parsedPage - 1) * parsedLimit : 0;
 
-        // ===== Build WHERE chung =====
         let conditions = [];
         let params = [];
 
@@ -33,7 +32,7 @@ exports.getAllDataSensors = async (req, res) => {
 
         const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
-        // ===== Query data =====
+        // Query data 
         let dataSql = `
             SELECT ds.ID, s.Name AS SensorName, ds.Value, ds.CreatedAt
             FROM datasensors ds
@@ -55,7 +54,7 @@ exports.getAllDataSensors = async (req, res) => {
 
         const [rows] = await db.query(dataSql, dataParams);
 
-        // ===== COUNT (chỉ khi có phân trang) =====
+        // COUNT (chỉ khi có phân trang
         let total = rows.length;
 
         if (parsedLimit && parsedPage) {

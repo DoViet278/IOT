@@ -18,7 +18,7 @@ mqttClient.on('connect', () => {
     console.log('MQTT Connected');
 
     const topics = [
-        process.env.MQTT_TOPIC,        // DataSensors
+        process.env.TOPIC_DATA,        // DataSensors
         process.env.TOPIC_RESPONSE,    // DeviceResponse
         process.env.TOPIC_SYNC_REQUEST 
     ];
@@ -38,7 +38,7 @@ mqttClient.on('message', async (topic, message) => {
     try {
         const data = JSON.parse(payload);
 
-        if (topic === process.env.MQTT_TOPIC) {
+        if (topic === process.env.TOPIC_DATA) {
             const { temperature, humidity, light } = data;
 
             if (temperature !== undefined && humidity !== undefined && light !== undefined) {
@@ -65,7 +65,7 @@ mqttClient.on('message', async (topic, message) => {
                     time: new Date().toLocaleTimeString('vi-VN')
                 });
 
-                console.log(`[SENSOR] T:${temperature} H:${humidity} L:${light}`);
+                console.log(`T:${temperature} H:${humidity} L:${light}`);
             }
         }
 
@@ -102,12 +102,12 @@ mqttClient.on('message', async (topic, message) => {
                     Action: data.Action || 'Unknown'
                 });
 
-                console.log(`[CONFIRM] Device ${DeviceID} Success`);
+                console.log(`Device ${DeviceID} Success`);
             }
         }
         else if (topic === process.env.TOPIC_SYNC_REQUEST) {
 
-            console.log("[SYNC] Request received");
+            console.log("Request received");
 
             const [rows] = await db.query(`
                 SELECT t.ID_Device, t.Action, t.Status

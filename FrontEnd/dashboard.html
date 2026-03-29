@@ -11,8 +11,6 @@
 <body>
 
 <div class="layout">
-
-    <!-- SIDEBAR -->
     <nav class="navbar">
         <div class="sidebar-title">
             <i class="fa-brands fa-pagelines"></i>
@@ -26,13 +24,9 @@
             <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
         </div>
     </nav>
-
-    <!-- CONTENT -->
     <div class="container">
-
-        <!-- STATISTICS -->
         <section class="stats-grid">
-            <div class="card temp">
+            <div class="card temp" id="tempCard">
                 <div>
                     <h3>Nhiệt Độ</h3>
                     <h2 id="tempValue">-- °C</h2>
@@ -40,7 +34,7 @@
                 <i class="fa-solid fa-temperature-high"></i>
             </div>
 
-            <div class="card humid">
+            <div class="card humid" id="humidCard">
                 <div>
                     <h3>Độ Ẩm</h3>
                     <h2 id="humidValue">-- %</h2>
@@ -48,7 +42,7 @@
                 <i class="fa-solid fa-droplet"></i>
             </div>
 
-            <div class="card light">
+            <div class="card light" id="lightCard">
                 <div>
                     <h3>Ánh Sáng</h3>
                     <h2 id="lightValue">-- lx</h2>
@@ -59,16 +53,11 @@
         </section>
 
         <div class="chart-section">
-
-            <!-- CHART -->
             <section class="chart-container">
                 <h3>Biểu Đồ 10 Giá Trị Gần Nhất</h3>
                 <canvas id="iotChart"></canvas>
             </section>
-
-            <!-- DEVICE CONTROL -->
             <section class="controls-vertical">
-
                 <div class="control-card" data-id="1">
                     <i class="fa-solid fa-lightbulb icon-light"></i>
                     <span>Đèn</span>

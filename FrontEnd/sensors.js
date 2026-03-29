@@ -7,22 +7,29 @@ const limit = 10;
 
 const tableBody = document.getElementById("sensor-data");
 const paginationContainer = document.querySelector(".pagination");
+const paginationInfo = document.getElementById("pagination-info");
+
 const searchBtn = document.querySelector(".btn-search");
 const dateInput = document.getElementById("date-input");
 const timeInput = document.getElementById("time-input");
 const sensorFilter = document.querySelector(".sensor-filter");
 
-function isValidTime(time) {
-    return /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(time);
+function isValidDateTime(value) {
+    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}(\s([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?)?$/.test(value);
 }
 
-function isValidDate(date) {
-    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/.test(date);
-}
+function convertDateTime(value) {
+    const parts = value.split(" ");
 
-function convertDate(date) {
-    const [dd, mm, yyyy] = date.split("/");
-    return `${yyyy}-${mm}-${dd}`;
+    const [dd, mm, yyyy] = parts[0].split("/");
+
+    // chỉ có ngày
+    if (parts.length === 1) {
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // có giờ phút hoặc giờ phút giây
+    return `${yyyy}-${mm}-${dd} ${parts[1]}`;
 }
 
 // FORMAT dd/mm/yyyy hh:mm:ss
@@ -63,7 +70,7 @@ async function loadData() {
 
         renderTable(result.data);
         renderPagination(result.totalPages);
-
+        renderPaginationInfo(result.total, result.totalPages);
     } catch (error) {
         console.error("Lỗi load data:", error);
     }
@@ -105,6 +112,15 @@ function getUnit(sensorName) {
     if (sensorName === "Độ ẩm") return "%";
     if (sensorName === "Ánh sáng") return " lx";
     return "";
+}
+
+function renderPaginationInfo(total, totalPages) {
+    const start = (currentPage - 1) * limit + 1;
+    const end = Math.min(currentPage * limit, total);
+
+    paginationInfo.innerHTML = `
+        Hiển thị ${start} - ${end} / ${total} bản ghi (Trang ${currentPage}/${totalPages})
+    `;
 }
 // RENDER PAGINATION
 function renderPagination(totalPages) {
@@ -170,22 +186,19 @@ function renderPagination(totalPages) {
 
 
 // SEARCH
+const datetimeInput = document.getElementById("datetime-input");
+
 searchBtn.addEventListener("click", () => {
 
-    const date = dateInput.value;
-    const time = timeInput.value;
+    const value = datetimeInput.value.trim();
 
-    if (time && !isValidTime(time)) {
-        alert("Giờ phải đúng định dạng HH:mm:ss");
+    if (value && !isValidDateTime(value)) {
+        alert("Phải nhập đúng định dạng dd/mm/yyyy HH:mm:ss");
         return;
     }
 
-    if (date) {
-
-        const sqlDate = convertDate(date);
-
-        currentSearch = time ? `${sqlDate} ${time}` : sqlDate;
-
+    if (value) {
+        currentSearch = convertDateTime(value);
     } else {
         currentSearch = "";
     }

@@ -9,7 +9,7 @@ const io = getIO();
 // [GET] /api/devices/data
 exports.getAllData = async (req, res) => {
     try {
-        const { search, deviceId, status, limit = 10, page = 1 } = req.query;
+        const { search, deviceId, status, action, limit = 10, page = 1 } = req.query;
 
         const parsedLimit = parseInt(limit);
         const parsedPage = parseInt(page);
@@ -33,6 +33,10 @@ exports.getAllData = async (req, res) => {
             params.push(status);
         }
 
+        if (action) {
+            conditions.push(`ah.Action = ?`);
+            params.push(action);
+        }
         const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
         // Query chính

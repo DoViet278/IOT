@@ -25,14 +25,10 @@
         <div class="container">
             <div class="filter-bar">
                 <div class="search-group">
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-calendar"></i>
-                        <input type="text" id="date-input" placeholder="dd/mm/yyyy">
-                    </div>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-clock"></i>
-                        <input type="text" placeholder="hh:mm:ss" id="time-input">
-                    </div>
+                     <div class="input-with-icon">
+                    <i class="fa-solid fa-calendar"></i>
+                    <input type="text" id="datetime-input" placeholder="dd/mm/yyyy HH:mm:ss">
+                </div>
                     <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
                 </div>
                 <select class="sensor-filter">
@@ -53,9 +49,9 @@
                             <th>Thời gian</th>
                         </tr>
                     </thead>
-                    <tbody id="sensor-data">
-                        </tbody>
+                    <tbody id="sensor-data"> </tbody>
                 </table>
+                <div class="table-footer" id="pagination-info"></div>
             </div>
 
             <div class="pagination" id="pagination">

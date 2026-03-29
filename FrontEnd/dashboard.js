@@ -42,8 +42,40 @@ const chart = new Chart(ctx, {
 });
 
 const MAX_POINTS = 10;
+function getGradient(type, value) {
+    let percent;
 
-// ================= LOAD DATA BAN ĐẦU =================
+    if (type === "temp") {
+        percent = value / 50; // max 50°C
+        percent = Math.max(0, Math.min(1, percent));
+
+        return `linear-gradient(135deg,
+            rgba(255,150,150, ${0.3 + percent * 0.7}),
+            rgba(255,0,0, ${0.5 + percent * 0.5})
+        )`;
+    }
+
+    if (type === "humid") {
+        percent = value / 100;
+        percent = Math.max(0, Math.min(1, percent));
+
+        return `linear-gradient(135deg,
+            rgba(150,200,255, ${0.3 + percent * 0.7}),
+            rgba(0,100,255, ${0.5 + percent * 0.5})
+        )`;
+    }
+
+    if (type === "light") {
+        percent = value / 1000;
+        percent = Math.max(0, Math.min(1, percent));
+
+        return `linear-gradient(135deg,
+            rgba(255,255,150, ${0.3 + percent * 0.7}),
+            rgba(255,200,0, ${0.5 + percent * 0.5})
+        )`;
+    }
+}
+// LOAD DATA BAN ĐẦU
 async function loadInitialData() {
     try {
         const res = await fetch(API_SENSORS);
@@ -55,21 +87,38 @@ async function loadInitialData() {
         const humidData = data.filter(d => d.SensorName === "Độ ẩm").slice(0,10).reverse();
         const lightData = data.filter(d => d.SensorName === "Ánh sáng").slice(0,10).reverse();
 
-        // if (tempData.length)
-        //     document.getElementById("tempValue").innerText =
-        //         tempData[tempData.length - 1].Value + " °C";
+        if (tempData.length)
+            document.getElementById("tempValue").innerText =
+                tempData[tempData.length - 1].Value + " °C";
 
-        // if (humidData.length)
-        //     document.getElementById("humidValue").innerText =
-        //         humidData[humidData.length - 1].Value + " %";
+        if (humidData.length)
+            document.getElementById("humidValue").innerText =
+                humidData[humidData.length - 1].Value + " %";
 
-        // if (lightData.length)
-        //     document.getElementById("lightValue").innerText =
-        //         lightData[lightData.length - 1].Value + " lx";
+        if (lightData.length)
+            document.getElementById("lightValue").innerText =
+                lightData[lightData.length - 1].Value + " lx";
 
+        if (tempData.length) {
+            const v = tempData[tempData.length - 1].Value;
+            document.getElementById("tempCard").style.background =
+                getGradient("temp", v);
+        }
+
+        if (humidData.length) {
+            const v = humidData[humidData.length - 1].Value;
+            document.getElementById("humidCard").style.background =
+                getGradient("humid", v);
+        }
+
+        if (lightData.length) {
+            const v = lightData[lightData.length - 1].Value;
+            document.getElementById("lightCard").style.background =
+                getGradient("light", v);
+        }
         chart.data.labels = tempData.map(d => {
             const date = new Date(d.CreatedAt);
-            return date.toLocaleTimeString(); // hiển thị giờ:phút:giây
+            return date.toLocaleTimeString();
         });
         chart.data.datasets[0].data = tempData.map(d => d.Value);
         chart.data.datasets[1].data = humidData.map(d => d.Value);
@@ -82,7 +131,7 @@ async function loadInitialData() {
     }
 }
 
-// ================= REALTIME SOCKET =================
+// REALTIME SOCKET
 function pushData(index, value) {
     chart.data.datasets[index].data.push(value);
     if (chart.data.datasets[index].data.length > MAX_POINTS) {
@@ -94,8 +143,6 @@ socket.on("sensorData", (data) => {
 
     if (chart.data.labels.length >= MAX_POINTS) {
         chart.data.labels.shift();
-
-        // shift tất cả dataset cùng lúc
         chart.data.datasets.forEach(ds => ds.data.shift());
     }
 
@@ -112,9 +159,15 @@ socket.on("sensorData", (data) => {
 
     document.getElementById("lightValue").innerText =
         data.light + " lx";
+    // update gradient card
+    document.getElementById("tempCard").style.background =
+        getGradient("temp", data.temperature);
 
-    // Push vào chart
-   
+    document.getElementById("humidCard").style.background =
+        getGradient("humid", data.humidity);
+
+    document.getElementById("lightCard").style.background =
+        getGradient("light", data.light);
     chart.update();
 });
 
@@ -134,7 +187,7 @@ const switches = {
 };
 
 
-// ================= LOAD TRẠNG THÁI BAN ĐẦU =================
+// LOAD TRẠNG THÁI BAN ĐẦU
 async function loadDeviceStatus() {
     try {
         const res = await fetch(`${API_DEVICES}/status`);
@@ -153,7 +206,7 @@ async function loadDeviceStatus() {
 
 
 
-// ================= GỬI LỆNH BẬT/TẮT =================
+// GỬI LỆNH BẬT/TẮT
 async function sendControl(DeviceID, isOn) {
 
     const Action = isOn ? "ON" : "OFF";
@@ -170,9 +223,7 @@ async function sendControl(DeviceID, isOn) {
     }
 }
 
-// ==========================
-// HÀM BẬT/TẮT LOADING
-// ==========================
+// LOADING
 function setLoading(deviceId, state) {
 
     const card = document.querySelector(`.control-card[data-id="${deviceId}"]`);
@@ -186,7 +237,7 @@ function setLoading(deviceId, state) {
 }
 
 
-// ================= SỰ KIỆN CLICK SWITCH =================
+// SỰ KIỆN CLICK SWITCH
 Object.keys(switches).forEach(id => {
 
     if (!switches[id]) return;
@@ -204,7 +255,7 @@ Object.keys(switches).forEach(id => {
 
 
 
-// ================= SOCKET REALTIME UPDATE =================
+// SOCKET REALTIME UPDATE
 socket.on("update_status", (data) => {
 
     console.log("Realtime device:", data);
@@ -213,28 +264,21 @@ socket.on("update_status", (data) => {
 
     if (!switches[DeviceID]) return;
 
-    // Nếu đang Processing thì không đổi gì
     if (Status === "Processing") {
         setLoading(DeviceID, true);
         return;
     }
 
-    // Nếu Success → cập nhật trạng thái đúng
     if (Status === "Success") {
         switches[DeviceID].checked = (Action === "ON");
     }
 
-    // Nếu Fail → revert lại trạng thái
     if (Status === "Fail") {
         switches[DeviceID].checked = !(Action === "ON");
         alert("Thiết bị không phản hồi (Timeout)");
     }
 
-    // Tắt loading khi có kết quả
     setLoading(DeviceID, false);
 });
 
-
-
-// ================= INIT =================
 loadDeviceStatus();
