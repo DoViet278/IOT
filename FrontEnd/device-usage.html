@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT - Device Usage</title>
+    <link rel="stylesheet" href="device-usage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <nav class="navbar">
+            <div class="sidebar-title">
+                <i class="fa-brands fa-pagelines"></i>
+                <h2>IOT</h2>
+            </div>
+
+            <div class="nav-links">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="sensors.html"><i class="fa-solid fa-database"></i> Data Sensors</a>
+                <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+                <a href="device-usage.html" class="active"><i class="fa-solid fa-chart-line"></i> Device Usage</a>
+                <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+            </div>
+        </nav>
+
+        <main class="container">
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow">Quản lý vận hành</p>
+                    <h1>Số lần bật tắt theo ngày</h1>
+                    <p class="subtext">Mỗi đường biểu diễn số lần bật/tắt thành công của một thiết bị trong từng ngày.</p>
+                </div>
+
+                <div class="toolbar">
+                    <label class="control">
+                        <span>Ngày cụ thể</span>
+                        <input type="date" id="date-input">
+                    </label>
+                    <label class="control">
+                        <span>Số ngày</span>
+                        <select id="days-select">
+                            <option value="7">7 ngày</option>
+                            <option value="14" selected>14 ngày</option>
+                            <option value="30">30 ngày</option>
+                            <option value="60">60 ngày</option>
+                        </select>
+                    </label>
+                    <button id="clear-date-btn" type="button">Bỏ chọn ngày</button>
+                    <button id="refresh-btn" type="button">
+                        <i class="fa-solid fa-rotate"></i>
+                        Làm mới
+                    </button>
+                </div>
+            </header>
+
+            <section class="stats-grid" id="summary-grid"></section>
+
+            <section class="chart-shell">
+                <div class="chart-header">
+                    <div>
+                        <h2>Biểu đồ theo ngày</h2>
+                        <p id="period-info">Đang tải dữ liệu...</p>
+                    </div>
+                    <div class="chart-legend-note">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Dữ liệu chỉ tính các lệnh có trạng thái Success.
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="device-usage.js"></script>
+</body>
+</html>

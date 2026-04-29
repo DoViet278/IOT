@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-const socketStorage = require('./socket'); // Import file vừa tạo
+const socketStorage = require('./socket');
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 
@@ -14,10 +14,9 @@ const server = http.createServer(app);
 // Swagger endpoint
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// KHỞI TẠO SOCKET TẠI ĐÂY
+// KHỞI TẠO SOCKET
 socketStorage.init(server); 
 
-// Sau khi init xong mới import MQTT và Routes
 const mqttClient = require('./config/mqtt');
 const sensorRoutes = require('./routes/sensorRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');

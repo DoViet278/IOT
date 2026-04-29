@@ -14,7 +14,7 @@ const options = {
       }
     ]
   },
-  apis: ["./src/routes/*.js"], // đọc comment swagger trong routes
+  apis: ["./src/routes/*.js"], 
 };
 
 const swaggerSpec = swaggerJsdoc(options);

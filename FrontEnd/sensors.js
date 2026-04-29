@@ -3,19 +3,19 @@ const API_BASE = "http://localhost:5000/api/sensors/data";
 let currentPage = 1;
 let currentSearch = "";
 let currentSensor = "";
+let currentValue = "";
 const limit = 10;
 
 const tableBody = document.getElementById("sensor-data");
 const paginationContainer = document.querySelector(".pagination");
 const paginationInfo = document.getElementById("pagination-info");
-
+const valueInput = document.getElementById("value-input");
 const searchBtn = document.querySelector(".btn-search");
-const dateInput = document.getElementById("date-input");
-const timeInput = document.getElementById("time-input");
+const datetimeInput = document.getElementById("datetime-input");
 const sensorFilter = document.querySelector(".sensor-filter");
 
 function isValidDateTime(value) {
-    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}(\s([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?)?$/.test(value);
+    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}(\s([01]\d|2[0-3])(:[0-5]\d(:[0-5]\d)?)?)?$/.test(value);
 }
 
 function convertDateTime(value) {
@@ -23,12 +23,10 @@ function convertDateTime(value) {
 
     const [dd, mm, yyyy] = parts[0].split("/");
 
-    // chỉ có ngày
     if (parts.length === 1) {
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    // có giờ phút hoặc giờ phút giây
     return `${yyyy}-${mm}-${dd} ${parts[1]}`;
 }
 
@@ -64,8 +62,13 @@ async function loadData() {
         params.append("sensor", currentSensor);
     }
 
+    if (currentValue) {
+        params.append("value", currentValue);
+    }
+    
     try {
         const res = await fetch(`${API_BASE}?${params}`);
+        console.log(`${API_BASE}?${params}`)
         const result = await res.json();
 
         renderTable(result.data);
@@ -186,21 +189,28 @@ function renderPagination(totalPages) {
 
 
 // SEARCH
-const datetimeInput = document.getElementById("datetime-input");
+
 
 searchBtn.addEventListener("click", () => {
 
-    const value = datetimeInput.value.trim();
+    const datetimeValue = datetimeInput.value.trim();
+    const sensorValue = valueInput.value.trim();
 
-    if (value && !isValidDateTime(value)) {
-        alert("Phải nhập đúng định dạng dd/mm/yyyy HH:mm:ss");
+    if (datetimeValue && !isValidDateTime(datetimeValue)) {
+        alert("Phải nhập đúng định dạng dd/mm/yyyy hh[:mm[:ss]]");
         return;
     }
 
-    if (value) {
-        currentSearch = convertDateTime(value);
+    if (datetimeValue) {
+        currentSearch = convertDateTime(datetimeValue);
     } else {
         currentSearch = "";
+    }
+
+    if (sensorValue) {
+        currentValue = sensorValue;
+    } else {
+        currentValue = "";
     }
 
     currentPage = 1;

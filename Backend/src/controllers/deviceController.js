@@ -5,6 +5,65 @@ const { getIO } = require('../socket');
 const timers = global.deviceTimers || {};
 const io = getIO();
 
+const DEVICE_NAMES = {
+    1: "Đèn",
+    2: "Quạt",
+    3: "Điều hòa",
+    4: "Tivi",
+    5: "Máy bơm"
+};
+
+function parseDays(value) {
+    const parsed = parseInt(value, 10);
+
+    if (Number.isNaN(parsed) || parsed < 1) {
+        return 14;
+    }
+
+    return Math.min(parsed, 90);
+}
+
+function parseSelectedDate(value) {
+    if (!value || typeof value !== "string") {
+        return null;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return null;
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return formatDateKey(date) === value ? value : null;
+}
+
+function formatDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function buildDateLabels(days) {
+    const labels = [];
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    startDate.setDate(startDate.getDate() - (days - 1));
+
+    for (let index = 0; index < days; index += 1) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + index);
+        labels.push(formatDateKey(currentDate));
+    }
+
+    return labels;
+}
+
 
 // [GET] /api/devices/data
 exports.getAllData = async (req, res) => {
@@ -87,7 +146,7 @@ exports.getLatestStatus = async (req, res) => {
                 FROM actionshistory
                 GROUP BY ID_Device
             ) latest ON t.ID = latest.MaxID
-            WHERE t.ID_Device IN (1,2,3)
+            WHERE t.ID_Device IN (1,2,3,4,5)
         `;
 
         const [rows] = await db.query(sql);
@@ -95,7 +154,9 @@ exports.getLatestStatus = async (req, res) => {
         const statusMap = {
             1: "OFF",
             2: "OFF",
-            3: "OFF"
+            3: "OFF",
+            4: "OFF",
+            5: "OFF"
         };
 
         rows.forEach(item => {
@@ -122,19 +183,101 @@ exports.getLatestStatus = async (req, res) => {
 };
 
 
+// [GET] /api/devices/usage/daily
+exports.getDailyUsageStats = async (req, res) => {
+    try {
+        const selectedDate = parseSelectedDate(req.query.date);
+        const days = selectedDate ? 1 : parseDays(req.query.days);
+        const labels = selectedDate ? [selectedDate] : buildDateLabels(days);
+        const startDate = labels[0];
+        const endDate = labels[labels.length - 1];
+
+        const aggregateSql = `
+            SELECT
+                DATE(ah.CreatedAt) AS actionDate,
+                ah.ID_Device AS DeviceID,
+                d.Name AS DeviceName,
+                COUNT(*) AS actionCount,
+                SUM(CASE WHEN UPPER(TRIM(ah.Action)) = 'ON' THEN 1 ELSE 0 END) AS onCount,
+                SUM(CASE WHEN UPPER(TRIM(ah.Action)) = 'OFF' THEN 1 ELSE 0 END) AS offCount
+            FROM actionshistory ah
+            JOIN device d ON ah.ID_Device = d.ID
+            WHERE ah.ID_Device IN (1, 2, 3, 4, 5)
+            AND ah.Status = 'Success'
+            AND DATE(ah.CreatedAt) BETWEEN ? AND ?
+            GROUP BY DATE(ah.CreatedAt), ah.ID_Device, d.Name
+            ORDER BY actionDate ASC, ah.ID_Device ASC
+        `;
+
+        const [rows] = await db.query(aggregateSql, [startDate, endDate]);
+
+        const devices = [1, 2, 3, 4, 5].map((deviceId) => ({
+            DeviceID: deviceId,
+            DeviceName: DEVICE_NAMES[deviceId],
+            data: labels.map(() => 0),
+            onData: labels.map(() => 0),
+            offData: labels.map(() => 0),
+            total: 0,
+            onCount: 0,
+            offCount: 0
+        }));
+
+        const deviceIndexMap = new Map(devices.map((device, index) => [device.DeviceID, index]));
+        const labelIndexMap = new Map(labels.map((label, index) => [label, index]));
+
+        rows.forEach((row) => {
+            const deviceIndex = deviceIndexMap.get(row.DeviceID);
+            const labelIndex = labelIndexMap.get(formatDateKey(new Date(row.actionDate)));
+
+            if (deviceIndex === undefined || labelIndex === undefined) {
+                return;
+            }
+
+            const count = Number(row.actionCount) || 0;
+            const onCount = Number(row.onCount) || 0;
+            const offCount = Number(row.offCount) || 0;
+
+            devices[deviceIndex].data[labelIndex] += count;
+            devices[deviceIndex].onData[labelIndex] += onCount;
+            devices[deviceIndex].offData[labelIndex] += offCount;
+            devices[deviceIndex].total += count;
+            devices[deviceIndex].onCount += onCount;
+            devices[deviceIndex].offCount += offCount;
+            devices[deviceIndex].DeviceName = row.DeviceName || devices[deviceIndex].DeviceName;
+        });
+
+        res.status(200).json({
+            days,
+            selectedDate,
+            startDate,
+            endDate,
+            labels,
+            devices,
+            summary: devices.map((device) => ({
+                DeviceID: device.DeviceID,
+                DeviceName: device.DeviceName,
+                total: device.total,
+                onCount: device.onCount,
+                offCount: device.offCount
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Lỗi Server", error: error.message });
+    }
+};
+
+
 // [POST] /api/devices/control
 exports.controlDevice = async (req, res) => {
     try {
         const { DeviceID, Action } = req.body;
 
-        // 1. Validate
         if (!DeviceID || !Action) {
             return res.status(400).json({
                 message: "Thiếu DeviceID hoặc Action"
             });
         }
 
-        // 2. Lưu lịch sử (Processing)
         const insertSql = `
             INSERT INTO actionshistory (ID_Device, Action, Status, CreatedAt)
             VALUES (?, ?, 'Processing', NOW())
@@ -143,13 +286,11 @@ exports.controlDevice = async (req, res) => {
         const [result] = await db.query(insertSql, [DeviceID, Action]);
         const historyId = result.insertId;
 
-        // 3. Publish MQTT
         const topic = process.env.TOPIC_CONTROL;
         const payload = JSON.stringify({ DeviceID, Action });
 
         mqttClient.publish(topic, payload, { qos: 1 });
 
-        // 4. Timeout xử lý Fail
         const handleTimeout = async () => {
             try {
                 const [rows] = await db.query(
@@ -183,7 +324,6 @@ exports.controlDevice = async (req, res) => {
 
         timers[historyId] = setTimeout(handleTimeout, 10000);
 
-        // 5. Response
         return res.status(200).json({
             message: "Lệnh đã được gửi, đang chờ phản hồi...",
             historyId

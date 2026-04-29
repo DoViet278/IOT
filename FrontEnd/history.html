@@ -18,6 +18,7 @@
                 <a href="dashboard.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
                 <a href="sensors.html"><i class="fa-solid fa-database"></i> Data Sensors</a>
                 <a href="history.html"  class="active"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+                <a href="device-usage.html"><i class="fa-solid fa-chart-line"></i> Device Usage</a>
                 <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
             </div>
         </nav>
@@ -50,6 +51,8 @@
                 <option value="light">Đèn</option>
                 <option value="fan">Quạt</option>
                 <option value="air">Điều hòa</option>
+                <option value="tivi">Tivi</option>
+                <option value="pump">Máy bơm</option>
             </select>
         </div>
 
@@ -67,14 +70,18 @@
                 <tbody id="history-data"></tbody>
             </table>
 
-            <div class="table-footer" id="pagination-info"></div>
         </div>
-        <div class="pagination" id="pagination">
-            <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-        
+        <div class="pagination-wrapper">
+                <div class="table-footer" id="pagination-info"></div>
+
+                <div class="pagination" id="pagination">
+                    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
     </div>
    </div>
 <script src="history.js"></script>

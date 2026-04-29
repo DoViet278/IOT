@@ -88,6 +88,64 @@ const deviceController = require('../controllers/deviceController');
  *         currentPage:
  *           type: integer
  *           example: 1
+ *
+ *     DeviceDailyUsageResponse:
+ *       type: object
+ *       properties:
+ *         days:
+ *           type: integer
+ *           example: 14
+ *         startDate:
+ *           type: string
+ *           example: "2026-04-01"
+ *         endDate:
+ *           type: string
+ *           example: "2026-04-14"
+ *         labels:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["2026-04-01", "2026-04-02"]
+ *         devices:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               DeviceID:
+ *                 type: integer
+ *                 example: 1
+ *               DeviceName:
+ *                 type: string
+ *                 example: "Đèn"
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 example: [2, 0]
+ *               total:
+ *                 type: integer
+ *                 example: 2
+ *               onCount:
+ *                 type: integer
+ *                 example: 1
+ *               offCount:
+ *                 type: integer
+ *                 example: 1
+ *         summary:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               DeviceID:
+ *                 type: integer
+ *               DeviceName:
+ *                 type: string
+ *               total:
+ *                 type: integer
+ *               onCount:
+ *                 type: integer
+ *               offCount:
+ *                 type: integer
  */
 
 /**
@@ -157,6 +215,38 @@ router.get('/data', deviceController.getAllData);
  *         description: Lỗi server
  */
 router.get('/status', deviceController.getLatestStatus);
+
+/**
+ * @swagger
+ * /api/devices/usage/daily:
+ *   get:
+ *     summary: Lấy thống kê số lần bật/tắt theo ngày cho 5 thiết bị
+ *     tags: [Devices]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2026-04-13"
+ *         description: Ngày cụ thể cần xem (nếu có thì ưu tiên hơn days)
+ *       - in: query
+ *         name: days
+ *         schema:
+ *           type: integer
+ *           default: 14
+ *         description: Số ngày gần nhất cần thống kê
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DeviceDailyUsageResponse'
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/usage/daily', deviceController.getDailyUsageStats);
 
 /**
  * @swagger

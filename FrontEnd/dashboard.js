@@ -10,6 +10,10 @@ const ctx = document.getElementById('iotChart').getContext('2d');
 
 const chart = new Chart(ctx, {
     type: 'line',
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    },
     data: {
         labels: [],
         datasets: [
@@ -46,7 +50,7 @@ function getGradient(type, value) {
     let percent;
 
     if (type === "temp") {
-        percent = value / 50; // max 50°C
+        percent = value / 50; 
         percent = Math.max(0, Math.min(1, percent));
 
         return `linear-gradient(135deg,
@@ -177,14 +181,35 @@ loadInitialData();
 const DEVICE = {
     LIGHT: 1,
     FAN: 2,
-    AIR: 3
+    AIR: 3,
+    TIVI: 4,
+    PUMP: 5
 };
 
 const switches = {
     1: document.getElementById("lightSwitch"),
     2: document.getElementById("fanSwitch"),
-    3: document.getElementById("airSwitch")
+    3: document.getElementById("airSwitch"),
+    4: document.getElementById("tvSwitch"),
+    5: document.getElementById("pumpSwitch")
 };
+
+function setModeStatus(deviceId, state) {
+    const card = document.querySelector(`.control-card[data-id="${deviceId}"]`);
+    if (!card) return;
+
+    const modeLabel = card.querySelector(".mode");
+    if (!modeLabel) return;
+
+    const labelMap = {
+        on: "Bật",
+        off: "Tắt",
+        loading: "Chờ"
+    };
+
+    modeLabel.textContent = labelMap[state] || "Tắt";
+    modeLabel.dataset.state = state;
+}
 
 
 // LOAD TRẠNG THÁI BAN ĐẦU
@@ -196,6 +221,7 @@ async function loadDeviceStatus() {
         Object.keys(data).forEach(id => {
             if (switches[id]) {
                 switches[id].checked = (data[id] === "ON");
+                setModeStatus(id, switches[id].checked ? "on" : "off");
             }
         });
 
@@ -203,7 +229,6 @@ async function loadDeviceStatus() {
         console.error("Lỗi load device status:", err);
     }
 }
-
 
 
 // GỬI LỆNH BẬT/TẮT
@@ -231,8 +256,11 @@ function setLoading(deviceId, state) {
 
     if (state) {
         card.classList.add("loading");
+        setModeStatus(deviceId, "loading");
     } else {
         card.classList.remove("loading");
+        const isOn = switches[deviceId] ? switches[deviceId].checked : false;
+        setModeStatus(deviceId, isOn ? "on" : "off");
     }
 }
 
@@ -246,13 +274,11 @@ Object.keys(switches).forEach(id => {
 
         const isOn = this.checked;
 
-        // bật loading khi gửi lệnh
         setLoading(id, true);
 
         sendControl(parseInt(id), isOn);
     });
 });
-
 
 
 // SOCKET REALTIME UPDATE
@@ -282,3 +308,9 @@ socket.on("update_status", (data) => {
 });
 
 loadDeviceStatus();
+
+Object.keys(switches).forEach(id => {
+    if (switches[id]) {
+        setModeStatus(id, switches[id].checked ? "on" : "off");
+    }
+});

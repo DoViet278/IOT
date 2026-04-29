@@ -153,7 +153,7 @@ input::-webkit-calendar-picker-indicator {
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { background: rgba(46, 204, 113, 0.1); color: var(--primary-green); padding: 20px; text-align: left; }
 .data-table td { padding: 18px 20px; border-bottom: 1px solid #2a3a4a; color: var(--text-dim); }
-.sensor-val { font-weight: bold; font-size: 1.1rem; color: var(--text-main); }
+.sensor-val { font-weight: bold; font-size: 1rem; color: var(--text-main); }
 .data-table tr:hover { background: rgba(255,255,255,0.02); }
 
 .pagination {
@@ -161,7 +161,8 @@ input::-webkit-calendar-picker-indicator {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-top: 30px;
+    margin-top: 10px;
+    margin-right: 30px;
 }
 
 .page-btn {
@@ -197,5 +198,9 @@ input::-webkit-calendar-picker-indicator {
     padding: 10px 5px;
     font-size: 14px;
     color: var(--primary-green); padding: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between; /* 2 bên */
+    align-items: center; /* căn giữa theo chiều dọc */
 }

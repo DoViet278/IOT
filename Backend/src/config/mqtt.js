@@ -18,8 +18,8 @@ mqttClient.on('connect', () => {
     console.log('MQTT Connected');
 
     const topics = [
-        process.env.TOPIC_DATA,        // DataSensors
-        process.env.TOPIC_RESPONSE,    // DeviceResponse
+        process.env.TOPIC_DATA,        
+        process.env.TOPIC_RESPONSE,    
         process.env.TOPIC_SYNC_REQUEST 
     ];
 

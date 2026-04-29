@@ -21,6 +21,7 @@
             <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
             <a href="sensors.html"><i class="fa-solid fa-database"></i> Data Sensors</a>
             <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+            <a href="device-usage.html"><i class="fa-solid fa-chart-line"></i> Device Usage</a>
             <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
         </div>
     </nav>
@@ -50,6 +51,7 @@
                 <i class="fa-solid fa-sun"></i>
             </div>
             
+            
         </section>
 
         <div class="chart-section">
@@ -68,6 +70,9 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <label class="mode" data-state="off">
+                        Tắt
+                    </label>
                 </div>
 
                 <div class="control-card" data-id="2">
@@ -80,6 +85,9 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <label class="mode" data-state="off">
+                        Tắt
+                    </label>
                 </div>
 
                 <div class="control-card" data-id="3">
@@ -92,8 +100,40 @@
                             <span class="slider"></span>
                         </label>
                     </div>  
+                    <label class="mode" data-state="off">
+                        Tắt
+                    </label>
+                </div>
+                
+                 <div class="control-card" data-id="4">
+                    <i class="fa-solid fa-tv icon-tv"></i>
+                    <span>Tivi</span>
+                    <div class="switch-wrapper">
+                        <div class="loader"></div>
+                        <label class="switch">
+                            <input type="checkbox" id="tvSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>  
+                    <label class="mode" data-state="off">
+                        Tắt
+                    </label>
                 </div>
 
+                 <div class="control-card" data-id="5">
+                    <i class="fa-solid fa-water icon-pump"></i>
+                    <span>Máy bơm</span>
+                    <div class="switch-wrapper">
+                        <div class="loader"></div>
+                        <label class="switch">
+                            <input type="checkbox" id="pumpSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>  
+                    <label class="mode" data-state="off">
+                        Tắt
+                    </label>
+                </div>
             </section>
         </div>
     </div>

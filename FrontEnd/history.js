@@ -19,7 +19,7 @@ const actionFilter = document.querySelector(".action-filter");
 const statusFilter = document.querySelector(".status-filter");
 
 function isValidDateTime(value) {
-    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}(\s([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?)?$/.test(value);
+    return /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}(\s([01]\d|2[0-3])(:[0-5]\d(:[0-5]\d)?)?)?$/.test(value);
 }
 // FORMAT DATE dd/mm/yyyy HH:mm:ss
 function formatDate(dateStr) {
@@ -40,12 +40,10 @@ function convertDateTime(value) {
 
     const [dd, mm, yyyy] = parts[0].split("/");
 
-    // chỉ có ngày
     if (parts.length === 1) {
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    // có giờ phút hoặc giờ phút giây
     return `${yyyy}-${mm}-${dd} ${parts[1]}`;
 }
 
@@ -199,7 +197,7 @@ searchBtn.addEventListener("click", () => {
     const value = datetimeInput.value.trim();
 
     if (value && !isValidDateTime(value)) {
-        alert("Phải nhập đúng định dạng dd/mm/yyyy HH:mm:ss");
+        alert("Phải nhập đúng định dạng dd/mm/yyyy hh[:mm[:ss]]");
         return;
     }
 
@@ -222,6 +220,8 @@ deviceFilter.addEventListener("change", () => {
     if (value === "light") currentDevice = 1;
     else if (value === "fan") currentDevice = 2;
     else if (value === "air") currentDevice = 3;
+    else if (value === "tivi") currentDevice = 4;
+    else if (value === "pump") currentDevice = 5;
     else currentDevice = "";
 
     currentPage = 1;

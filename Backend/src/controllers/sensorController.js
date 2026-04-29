@@ -3,7 +3,7 @@ const db = require('../config/db');
 // [GET] /api/sensors/data?range=10days&search=&sensor=&limit=&page=
 exports.getAllDataSensors = async (req, res) => {
     try {
-        const { range, search, sensor, limit, page } = req.query;
+        const { range,value, search, sensor, limit, page } = req.query;
 
         const parsedLimit = limit ? parseInt(limit) : null;
         const parsedPage = page ? parseInt(page) : null;
@@ -23,13 +23,16 @@ exports.getAllDataSensors = async (req, res) => {
 
         if (search) {
             conditions.push(`(
-                ds.Value LIKE ?
-                OR DATE_FORMAT(ds.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?
+                 DATE_FORMAT(ds.CreatedAt, '%Y-%m-%d %H:%i:%s') LIKE ?
             )`);
             const pattern = `%${search}%`;
-            params.push(pattern, pattern);
+            params.push(pattern);
         }
 
+        if (value) {
+            conditions.push(`CAST(ds.Value AS CHAR) LIKE ?`);
+            params.push(`%${value}%`);
+        }
         const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
         // Query data 

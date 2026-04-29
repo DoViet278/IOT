@@ -144,7 +144,8 @@ input::-webkit-calendar-picker-indicator {
 .sensor-val { font-weight: bold; font-size: 1.1rem; color: var(--text-main); }
 .data-table tr:hover { background: rgba(255,255,255,0.02); }
 
-.pagination { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
+.pagination { display: flex; justify-content: center; gap: 12px; margin-top: 10px;
+    margin-right: 30px; }
 .page-btn {
     background: var(--card-bg); border: 1px solid #2a3a4a; color: white;
     width: 40px; height: 40px; border-radius: 8px; cursor: pointer; transition: 0.3s;
@@ -157,7 +158,12 @@ input::-webkit-calendar-picker-indicator {
     padding: 10px 5px;
     font-size: 14px;
     color: var(--primary-green); padding: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between; /* 2 bên */
+    align-items: center; /* căn giữa theo chiều dọc */
 }
 .status { padding: 6px 12px; border-radius: 15px; font-weight: bold; font-size: 13px; }
 .success { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }

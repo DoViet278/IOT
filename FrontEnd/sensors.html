@@ -18,6 +18,7 @@
                 <a href="dashboard.html" ><i class="fa-solid fa-house"></i> Dashboard</a>
                 <a href="sensors.html" class="active"><i class="fa-solid fa-database"></i> Data Sensors</a>
                 <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> Actions History</a>
+                <a href="device-usage.html"><i class="fa-solid fa-chart-line"></i> Device Usage</a>
                 <a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a>
             </div>
         </nav>
@@ -26,9 +27,13 @@
             <div class="filter-bar">
                 <div class="search-group">
                      <div class="input-with-icon">
-                    <i class="fa-solid fa-calendar"></i>
-                    <input type="text" id="datetime-input" placeholder="dd/mm/yyyy HH:mm:ss">
-                </div>
+                        <i class="fa-solid fa-calendar"></i>
+                        <input type="text" id="datetime-input" placeholder="dd/mm/yyyy HH:mm:ss">
+                    </div>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-sliders"></i>
+                        <input type="text" id="value-input" placeholder="Giá trị cảm biến">
+                    </div>
                     <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
                 </div>
                 <select class="sensor-filter">
@@ -51,15 +56,19 @@
                     </thead>
                     <tbody id="sensor-data"> </tbody>
                 </table>
-                <div class="table-footer" id="pagination-info"></div>
+                
             </div>
+            
+            <div class="pagination-wrapper">
+                <div class="table-footer" id="pagination-info"></div>
 
-            <div class="pagination" id="pagination">
-                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="pagination" id="pagination">
+                    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
             </div>
         </div>    
    </div>
